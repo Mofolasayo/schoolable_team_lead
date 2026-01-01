@@ -90,13 +90,23 @@ export default function MyTeamPage() {
                         <Card
                             key={member.id}
                             onClick={() => setSelectedMember(member)}
-                            className="group hover:border-indigo-200 transition-all duration-200 shadow-sm cursor-pointer hover:shadow-md"
+                            className={`group hover:border-indigo-200 transition-all duration-200 shadow-sm cursor-pointer hover:shadow-md ${member.is_team_lead ? 'ring-2 ring-indigo-200 border-indigo-300' : ''
+                                }`}
                         >
                             <CardContent className="p-5">
+                                {/* Team Lead Badge */}
+                                {member.is_team_lead && (
+                                    <div className="mb-3">
+                                        <Badge className="bg-indigo-600 text-white text-[10px] border-0">
+                                            👑 Team Lead
+                                        </Badge>
+                                    </div>
+                                )}
+
                                 <div className="flex items-start gap-4">
                                     {/* Avatar */}
                                     <div className="relative shrink-0">
-                                        <Avatar className="h-12 w-12 border border-slate-100">
+                                        <Avatar className={`h-12 w-12 border ${member.is_team_lead ? 'border-indigo-300' : 'border-slate-100'}`}>
                                             <AvatarImage src={member.avatar_url} />
                                             <AvatarFallback>{member.full_name?.[0] || '?'}</AvatarFallback>
                                         </Avatar>
@@ -124,9 +134,9 @@ export default function MyTeamPage() {
                                                     <Badge
                                                         variant="secondary"
                                                         className={`text-[10px] py-0 h-4 ${member.aura_grade === 'A' ? 'bg-emerald-50 text-emerald-700' :
-                                                                member.aura_grade === 'B' ? 'bg-indigo-50 text-indigo-700' :
-                                                                    member.aura_grade === 'C' ? 'bg-amber-50 text-amber-700' :
-                                                                        'bg-slate-50 text-slate-700'
+                                                            member.aura_grade === 'B' ? 'bg-indigo-50 text-indigo-700' :
+                                                                member.aura_grade === 'C' ? 'bg-amber-50 text-amber-700' :
+                                                                    'bg-slate-50 text-slate-700'
                                                             }`}
                                                     >
                                                         Grade {member.aura_grade}
@@ -139,21 +149,23 @@ export default function MyTeamPage() {
                                     </div>
                                 </div>
 
-                                {/* Weekly Report Status */}
-                                <div className="mt-4 pt-3 border-t border-slate-100">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-slate-500">Weekly Report</span>
-                                        {member.weekly_report_submitted ? (
-                                            <Badge className="bg-emerald-50 text-emerald-700 text-[10px] border-0">
-                                                Submitted
-                                            </Badge>
-                                        ) : (
-                                            <Badge variant="outline" className="text-amber-600 border-amber-200 text-[10px]">
-                                                Pending
-                                            </Badge>
-                                        )}
+                                {/* Weekly Report Status - Only show for non-team-lead members */}
+                                {!member.is_team_lead && (
+                                    <div className="mt-4 pt-3 border-t border-slate-100">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-slate-500">Weekly Report</span>
+                                            {member.weekly_report_submitted ? (
+                                                <Badge className="bg-emerald-50 text-emerald-700 text-[10px] border-0">
+                                                    Submitted
+                                                </Badge>
+                                            ) : (
+                                                <Badge variant="outline" className="text-amber-600 border-amber-200 text-[10px]">
+                                                    Pending
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </CardContent>
                         </Card>
                     ))}
@@ -188,8 +200,8 @@ export default function MyTeamPage() {
                                     <AvatarFallback>{selectedMember.full_name?.[0]}</AvatarFallback>
                                 </Avatar>
                                 <div className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${selectedMember.status === 'active'
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                        : 'bg-slate-50 text-slate-600 border-slate-100'
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                    : 'bg-slate-50 text-slate-600 border-slate-100'
                                     }`}>
                                     {selectedMember.status === 'active' ? 'Active' : 'Inactive'}
                                 </div>

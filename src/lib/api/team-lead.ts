@@ -76,6 +76,7 @@ export interface TeamMember {
     department: string;
     status: string | null;
     employee_id: string | null;
+    is_team_lead: boolean;
     avatar_url: string;
     aura_score: number | null;
     aura_grade: string;
@@ -97,8 +98,8 @@ export interface TeamMembersResponse {
     members: TeamMember[];
 }
 
-export async function getTeamMembers(): Promise<TeamMembersResponse> {
-    return authFetch<TeamMembersResponse>('/api/team-lead/team-members');
+export async function getTeamMembers(includeSelf: boolean = true): Promise<TeamMembersResponse> {
+    return authFetch<TeamMembersResponse>(`/api/team-lead/team-members?includeSelf=${includeSelf}`);
 }
 
 // ================================

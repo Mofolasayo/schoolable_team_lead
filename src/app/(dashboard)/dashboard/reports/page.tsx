@@ -148,15 +148,17 @@ export default function WeeklyReportsPage() {
             try {
                 setIsLoadingMembers(true);
                 setLoadError(null);
-                const data = await getTeamMembers();
-                // Transform API members to local format
-                const members: TeamMember[] = data.members.map((m: ApiTeamMember) => ({
-                    id: m.id,
-                    name: m.full_name,
-                    role: m.job_title || 'Team Member',
-                    department: m.department,
-                    avatarUrl: m.avatar_url,
-                }));
+                const data = await getTeamMembers(false); // Exclude self (team lead)
+                // Transform API members to local format, filtering out any team leads
+                const members: TeamMember[] = data.members
+                    .filter((m: ApiTeamMember) => !m.is_team_lead) // Only rate non-team-lead members
+                    .map((m: ApiTeamMember) => ({
+                        id: m.id,
+                        name: m.full_name,
+                        role: m.job_title || 'Team Member',
+                        department: m.department,
+                        avatarUrl: m.avatar_url,
+                    }));
                 setTeamMembers(members);
             } catch (err) {
                 setLoadError(err instanceof Error ? err.message : 'Failed to load team members');
