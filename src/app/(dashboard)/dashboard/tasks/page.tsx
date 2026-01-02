@@ -22,9 +22,12 @@ import {
     updateTaskStatus,
     deleteTask,
     getDashboardStats,
+    getTasksPendingRating,
     Task,
     TeamMember,
+    type PendingRating,
 } from '@/lib/api/team-lead';
+import { TaskRatingPrompt } from '@/components/TaskRatingModal';
 
 type TaskStatus = 'Pending' | 'In Progress' | 'Completed' | 'Overdue';
 type TaskPriority = 'Low' | 'Medium' | 'High' | 'Critical';
@@ -110,6 +113,7 @@ export default function TaskManagementPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [pendingRatings, setPendingRatings] = useState<PendingRating[]>([]);
 
     // Filters
     const [selectedStatus, setSelectedStatus] = useState<TaskStatus | 'All'>('All');
@@ -135,13 +139,15 @@ export default function TaskManagementPage() {
 
     const refreshTasks = useCallback(async () => {
         try {
-            const [tasksData, membersData, statsData] = await Promise.all([
+            const [tasksData, membersData, statsData, ratingsData] = await Promise.all([
                 getTeamTasks(),
                 getTeamMembers(true),
                 getDashboardStats(),
+                getTasksPendingRating(),
             ]);
 
             setDepartment(statsData.department);
+            setPendingRatings(ratingsData.pendingRatings || []);
 
             const displayTasks: DisplayTask[] = tasksData.map((task: Task) => {
                 const assignee = membersData.members.find(m => m.id === task.assignee_id);
@@ -832,6 +838,14 @@ export default function TaskManagementPage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Task Rating Prompt - shows when there are tasks pending rating */}
+            {pendingRatings.length > 0 && (
+                <TaskRatingPrompt
+                    pendingTasks={pendingRatings}
+                    onRated={() => refreshTasks()}
+                />
             )}
         </div>
     );

@@ -196,6 +196,38 @@ export async function deleteTask(taskId: string): Promise<{ success: boolean }> 
 }
 
 // ================================
+// Task Quality Rating
+// ================================
+
+export interface PendingRating {
+    id: number;
+    title: string;
+    assigneeId: string;
+    assigneeName: string;
+    completedAt: string;
+}
+
+export interface RateTaskRequest {
+    rating: number; // 1-5
+    comment?: string;
+}
+
+export async function getTasksPendingRating(): Promise<{ pendingRatings: PendingRating[]; count: number }> {
+    return authFetch('/tasks/rating/pending');
+}
+
+export async function rateTask(taskId: number, data: RateTaskRequest): Promise<{ success: boolean; message: string; taskId: number; rating: number }> {
+    return authFetch(`/tasks/${taskId}/rate`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function getAverageRating(employeeId: string): Promise<{ employeeId: string; averageRating: number | null; hasRatings: boolean }> {
+    return authFetch(`/tasks/rating/average/${employeeId}`);
+}
+
+// ================================
 // Announcements (using existing endpoints)
 // ================================
 

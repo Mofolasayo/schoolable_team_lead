@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone, LucideIcon, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone, LucideIcon, Brain } from 'lucide-react';
 
 export interface NavigationItem {
   title: string;
@@ -33,9 +33,9 @@ export const dashboardNavigation: NavigationItem[] = [
     section: 'main',
   },
   {
-    title: 'Peer Feedback',
-    href: '/dashboard/peer-feedback',
-    icon: MessageCircle,
+    title: 'AI Insights',
+    href: '/dashboard/insights',
+    icon: Brain,
     section: 'main',
   },
   {
@@ -51,4 +51,3 @@ export const dashboardNavigation: NavigationItem[] = [
     section: 'system',
   },
 ];
-
