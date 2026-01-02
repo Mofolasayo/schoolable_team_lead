@@ -1,6 +1,13 @@
-import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone } from 'lucide-react';
+import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone, LucideIcon, MessageCircle } from 'lucide-react';
 
-export const dashboardNavigation = [
+export interface NavigationItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  section: string;
+}
+
+export const dashboardNavigation: NavigationItem[] = [
   {
     title: 'Dashboard',
     href: '/dashboard',
@@ -20,9 +27,15 @@ export const dashboardNavigation = [
     section: 'main',
   },
   {
-    title: 'Reports',
+    title: 'Weekly Reports',
     href: '/dashboard/reports',
     icon: FileText,
+    section: 'main',
+  },
+  {
+    title: 'Peer Feedback',
+    href: '/dashboard/peer-feedback',
+    icon: MessageCircle,
     section: 'main',
   },
   {
@@ -38,3 +51,4 @@ export const dashboardNavigation = [
     section: 'system',
   },
 ];
+

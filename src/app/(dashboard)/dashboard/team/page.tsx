@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Mail, Phone, MapPin, X, Calendar, Loader2, AlertCircle, Star } from 'lucide-react';
+import { MessageSquare, Mail, X, Loader2, AlertCircle, Star } from 'lucide-react';
 import { CustomDialog } from '@/components/ui/custom-dialog';
 import { getTeamMembers, TeamMember, TeamMembersResponse } from '@/lib/api/team-lead';
 
@@ -178,7 +178,6 @@ export default function MyTeamPage() {
                 onOpenChange={(open) => !open && setSelectedMember(null)}
                 title=""
                 description=""
-                className="max-w-md p-0 overflow-hidden"
             >
                 {selectedMember && (
                     <div className="flex flex-col">

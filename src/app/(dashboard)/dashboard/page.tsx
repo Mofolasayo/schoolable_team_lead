@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, CheckCircle, Clock, Zap, Activity, Users, ArrowUpRight, Calendar, Loader2, AlertCircle, Star, FileText } from 'lucide-react';
+import { CheckCircle, Zap, Users, ArrowUpRight, Loader2, AlertCircle, Star, FileText } from 'lucide-react';
 import { VelocityChart } from '@/components/dashboard/VelocityChart';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getDashboardStats, getTeamMembers, DashboardStats, TeamMember } from '@/lib/api/team-lead';
@@ -108,19 +108,21 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Tasks In Progress */}
+        {/* Total Tasks */}
         <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2.5 rounded-xl bg-amber-100/50 text-amber-600">
+              <div className="p-2.5 rounded-xl bg-blue-100/50 text-blue-600">
                 <Zap className="h-5 w-5" />
               </div>
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-medium text-slate-500">Tasks In Progress</h3>
-              <div className="text-2xl font-bold text-slate-900">{stats?.tasks.in_progress || 0}</div>
+              <h3 className="text-sm font-medium text-slate-500">Total Team Tasks</h3>
+              <div className="text-2xl font-bold text-slate-900">{stats?.tasks.total || 0}</div>
             </div>
-            <p className="text-xs text-slate-400 mt-2">{stats?.tasks.pending || 0} pending</p>
+            <p className="text-xs text-slate-400 mt-2">
+              {stats?.tasks.in_progress || 0} in progress • {stats?.tasks.pending || 0} pending
+            </p>
           </CardContent>
         </Card>
 

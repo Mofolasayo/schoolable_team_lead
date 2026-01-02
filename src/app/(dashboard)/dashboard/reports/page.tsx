@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
-    User,
     ArrowLeft,
-    ArrowRight,
     Send,
     Save,
     Clock,
@@ -20,11 +18,7 @@ import {
     FileText,
     X,
     Check,
-    FileUp,
-    Calendar,
-    ChevronRight,
-    Loader2,
-    AlertCircle
+    ChevronRight
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -39,10 +33,12 @@ interface TeamMember {
     avatarUrl?: string;
 }
 
+// Simplified rating - only soft skills that can't be auto-calculated
+// Field names match backend WeeklyPerformanceReport entity
 interface TeamLeadRating {
-    teamworkCollaboration: number;
-    initiative: number;
-    attitudeTowardsWork: number;
+    initiative: number;        // -> initiativeScore in backend
+    attitude: number;          // -> attitudeTowardsWorkScore in backend
+    teamwork: number;          // -> teamworkCollaborationScore in backend
 }
 
 interface WeeklyReport {
@@ -52,35 +48,33 @@ interface WeeklyReport {
     areasForFocus: string;
 }
 
-// Rating items for team lead to assess
+// SIMPLIFIED Rating items - Only soft skills that can't be auto-calculated
+// Technical tasks, attendance, compliance, and training are now auto-calculated!
 const RATING_ITEMS = [
     {
-        key: "teamworkCollaboration" as const,
+        key: "initiative" as const,
+        name: "Initiative & Proactiveness",
+        description: "Takes ownership, suggests improvements, works without constant direction.",
+        icon: Zap,
+        color: "text-blue-600",
+        bgColor: "bg-blue-50"
+    },
+    {
+        key: "attitude" as const,
+        name: "Attitude & Mindset",
+        description: "Positive approach to work, handles challenges well, remains positive.",
+        icon: Smile,
+        color: "text-amber-600",
+        bgColor: "bg-amber-50"
+    },
+    {
+        key: "teamwork" as const,
         name: "Teamwork & Collaboration",
-        pillar: "Behavioral Competence",
+        description: "Communication quality, helps teammates, professional conduct.",
         icon: Users,
         color: "text-indigo-600",
-        bgColor: "bg-indigo-50",
-        description: "How well does this team member work with others and collaborate on team efforts?",
-    },
-    {
-        key: "initiative" as const,
-        name: "Initiative & Ownership",
-        pillar: "Behavioral Competence",
-        icon: Zap,
-        color: "text-amber-600",
-        bgColor: "bg-amber-50",
-        description: "Does this team member take proactive action and go beyond what is expected?",
-    },
-    {
-        key: "attitudeTowardsWork" as const,
-        name: "Attitude Towards Work",
-        pillar: "Culture Fit",
-        icon: Smile,
-        color: "text-rose-600",
-        bgColor: "bg-rose-50",
-        description: "Does this team member demonstrate a positive, professional attitude?",
-    },
+        bgColor: "bg-indigo-50"
+    }
 ];
 
 const getCurrentWeekNumber = (): number => {
@@ -132,8 +126,8 @@ export default function WeeklyReportsPage() {
 
     // State
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-    const [isLoadingMembers, setIsLoadingMembers] = useState(true);
-    const [loadError, setLoadError] = useState<string | null>(null);
+    const [_isLoadingMembers, setIsLoadingMembers] = useState(true);
+    const [_loadError, setLoadError] = useState<string | null>(null);
     const [currentMemberIndex, setCurrentMemberIndex] = useState(0);
     const [reports, setReports] = useState<Record<string, WeeklyReport>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -182,7 +176,7 @@ export default function WeeklyReportsPage() {
                 ...prev,
                 [currentMember.id]: {
                     employeeId: currentMember.id,
-                    ratings: { teamworkCollaboration: 0, initiative: 0, attitudeTowardsWork: 0 },
+                    ratings: { initiative: 0, attitude: 0, teamwork: 0 },
                     weeklyHighlights: "",
                     areasForFocus: "",
                 },
@@ -193,20 +187,21 @@ export default function WeeklyReportsPage() {
     const memberId = currentMember?.id ?? "";
     const currentReport = reports[memberId] || {
         employeeId: memberId,
-        ratings: { teamworkCollaboration: 0, initiative: 0, attitudeTowardsWork: 0 },
+        ratings: { initiative: 0, attitude: 0, teamwork: 0 },
         weeklyHighlights: "",
         areasForFocus: "",
     };
 
     // Check if current member's report is complete
+    // Simplified: only 3 ratings now
     const isCurrentReportComplete =
-        currentReport.ratings.teamworkCollaboration > 0 &&
         currentReport.ratings.initiative > 0 &&
-        currentReport.ratings.attitudeTowardsWork > 0;
+        currentReport.ratings.attitude > 0 &&
+        currentReport.ratings.teamwork > 0;
 
     // Count completed reports
     const completedCount = Object.values(reports).filter(
-        (r) => r.ratings.teamworkCollaboration > 0 && r.ratings.initiative > 0 && r.ratings.attitudeTowardsWork > 0
+        (r) => r.ratings.initiative > 0 && r.ratings.attitude > 0 && r.ratings.teamwork > 0
     ).length;
 
     const allRatingsComplete = completedCount === teamMembers.length;
@@ -217,7 +212,7 @@ export default function WeeklyReportsPage() {
         const id = currentMember.id;
         const existing = reports[id] || {
             employeeId: id,
-            ratings: { teamworkCollaboration: 0, initiative: 0, attitudeTowardsWork: 0 },
+            ratings: { initiative: 0, attitude: 0, teamwork: 0 },
             weeklyHighlights: "",
             areasForFocus: "",
         };
@@ -238,7 +233,7 @@ export default function WeeklyReportsPage() {
         const id = currentMember.id;
         const existing = reports[id] || {
             employeeId: id,
-            ratings: { teamworkCollaboration: 0, initiative: 0, attitudeTowardsWork: 0 },
+            ratings: { initiative: 0, attitude: 0, teamwork: 0 },
             weeklyHighlights: "",
             areasForFocus: "",
         };
@@ -293,26 +288,24 @@ export default function WeeklyReportsPage() {
 
         setIsSubmitting(true);
         try {
-            // Prepare batch request
+            // Prepare batch request with simplified ratings
+            // Field names match backend WeeklyPerformanceReport entity
             const batchRequest = {
                 weekNumber,
                 year,
                 reports: Object.values(reports).map((report) => ({
                     employeeId: report.employeeId,
-                    teamworkCollaborationScore: report.ratings.teamworkCollaboration,
+                    // Map frontend fields to backend field names
                     initiativeScore: report.ratings.initiative,
-                    attitudeTowardsWorkScore: report.ratings.attitudeTowardsWork,
+                    attitudeTowardsWorkScore: report.ratings.attitude,
+                    teamworkCollaborationScore: report.ratings.teamwork,
                     weeklyHighlights: report.weeklyHighlights,
                     areasForFocus: report.areasForFocus,
-                })),
-                hasTeamReport: !!teamReportDocument,
+                }))
             };
 
-            // TODO: Replace with actual API call
-            console.log("Submitting batch:", batchRequest);
-
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            // Submit via API
+            await submitBatchWeeklyReports(batchRequest);
 
             toast.success(`Week ${weekNumber} reports submitted successfully!`);
         } catch (error) {
@@ -357,9 +350,9 @@ export default function WeeklyReportsPage() {
                                     {teamMembers.map((member) => {
                                         const report = reports[member.id];
                                         const isComplete = report &&
-                                            report.ratings.teamworkCollaboration > 0 &&
                                             report.ratings.initiative > 0 &&
-                                            report.ratings.attitudeTowardsWork > 0;
+                                            report.ratings.attitude > 0 &&
+                                            report.ratings.teamwork > 0;
 
                                         return (
                                             <div key={member.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors group">

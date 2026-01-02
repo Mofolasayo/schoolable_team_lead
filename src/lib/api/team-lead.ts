@@ -161,10 +161,11 @@ export async function getTeamTasks(): Promise<Task[]> {
 export interface CreateTaskRequest {
     title: string;
     description?: string;
-    assignee_id: string;
+    assigneeId: string;
+    organization: string; // Department - required for team filtering
     priority: string;
-    due_date?: string;
-    category?: string;
+    dueDate?: string;
+    tags?: string[];
 }
 
 export async function createTask(task: CreateTaskRequest): Promise<Task> {
@@ -181,6 +182,19 @@ export async function updateTaskStatus(taskId: string, status: string): Promise<
     });
 }
 
+export async function updateTask(taskId: string, updates: Partial<CreateTaskRequest>): Promise<Task> {
+    return authFetch<Task>(`/tasks/${taskId}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+    });
+}
+
+export async function deleteTask(taskId: string): Promise<{ success: boolean }> {
+    return authFetch<{ success: boolean }>(`/tasks/${taskId}`, {
+        method: 'DELETE',
+    });
+}
+
 // ================================
 // Announcements (using existing endpoints)
 // ================================
@@ -193,11 +207,24 @@ export interface Announcement {
     author_name: string | null;
     created_at: string;
     category: string | null;
+    audience: string | null;
+    status: 'Published' | 'Draft' | 'Scheduled';
+    scheduled_at: string | null;
     is_pinned: boolean;
 }
 
 export async function getAnnouncements(): Promise<Announcement[]> {
     return authFetch<Announcement[]>('/announcements');
+}
+
+export async function getTeamAnnouncements(department: string): Promise<Announcement[]> {
+    const all = await getAnnouncements();
+    // Filter to show announcements for this team or all staff
+    return all.filter(a =>
+        !a.audience ||
+        a.audience === 'All Staff' ||
+        a.audience.toLowerCase() === department.toLowerCase()
+    );
 }
 
 // ================================
@@ -224,15 +251,18 @@ export async function submitWeeklyReport(report: WeeklyReportRequest): Promise<{
     });
 }
 
+// Simplified batch report request - only soft skills now
+// Technical metrics are auto-calculated from tasks, attendance, compliance, training
 export interface BatchReportRequest {
     weekNumber: number;
     year: number;
     reports: {
         employeeId: string;
-        technicalScore: number;
-        behavioralScore: number;
-        cultureFitScore: number;
-        growthLearningScore: number;
+        // Simplified: only soft skills that can't be auto-calculated
+        // These map to existing backend fields
+        initiativeScore: number;              // Maps to initiative_score in DB
+        attitudeTowardsWorkScore: number;     // Maps to attitude_towards_work_score in DB  
+        teamworkCollaborationScore: number;   // Maps to teamwork_collaboration_score in DB
         weeklyHighlights?: string;
         areasForFocus?: string;
     }[];
@@ -243,4 +273,447 @@ export async function submitBatchWeeklyReports(batch: BatchReportRequest): Promi
         method: 'POST',
         body: JSON.stringify(batch),
     });
+}
+
+export interface CreateAnnouncementRequest {
+    title: string;
+    content: string;
+    category?: string;
+    audience?: string;
+    status?: 'Published' | 'Draft' | 'Scheduled';
+    scheduled_at?: string | null;
+    is_pinned?: boolean;
+}
+
+export async function createAnnouncement(announcement: CreateAnnouncementRequest): Promise<Announcement> {
+    return authFetch<Announcement>('/announcements', {
+        method: 'POST',
+        body: JSON.stringify(announcement),
+    });
+}
+
+export async function updateAnnouncement(id: string, updates: Partial<CreateAnnouncementRequest>): Promise<Announcement> {
+    return authFetch<Announcement>(`/announcements/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+    });
+}
+
+export async function deleteAnnouncement(id: string): Promise<{ success: boolean }> {
+    return authFetch<{ success: boolean }>(`/announcements/${id}`, {
+        method: 'DELETE',
+    });
+}
+
+// ================================
+// Peer Feedback
+// ================================
+
+export interface PeerFeedbackRequest {
+    toEmployeeId: string;
+    quarter: string;
+    year: number;
+    supportRating: number;
+    collaborationRating?: number;
+    communicationRating?: number;
+    adaptabilityRating?: number;
+    valuesRating?: number;
+    accountabilityRating?: number;
+    feedbackRating?: number;
+    // For rating team leads
+    orgGuidanceRating?: number;
+    peopleCultureRating?: number;
+    influenceRating?: number;
+    strengths?: string;
+    areasForImprovement?: string;
+    isAnonymous?: boolean;
+}
+
+export interface PeerFeedbackResponse {
+    id: number;
+    fromEmployeeId: string;
+    toEmployeeId: string;
+    quarter: string;
+    year: number;
+    supportRating: number;
+    strengths: string | null;
+    areasForImprovement: string | null;
+    createdAt: string;
+}
+
+export async function submitPeerFeedback(feedback: PeerFeedbackRequest): Promise<PeerFeedbackResponse> {
+    return authFetch<PeerFeedbackResponse>('/api/performance/peer-feedback', {
+        method: 'POST',
+        body: JSON.stringify(feedback),
+    });
+}
+
+export async function getMyPeerFeedbackStatus(): Promise<{
+    quarter: string;
+    year: number;
+    submittedCount: number;
+    pendingCount: number;
+    teamMembers: { id: string; name: string; submitted: boolean }[];
+}> {
+    return authFetch('/api/performance/peer-feedback/status');
+}
+
+export async function getPeerFeedbackForMe(): Promise<{
+    averages: {
+        supportRating: number;
+        collaborationRating: number;
+        adaptabilityRating: number;
+        overallRating: number;
+    };
+    feedbackCount: number;
+    strengths: string[];
+    areasForImprovement: string[];
+}> {
+    return authFetch('/api/performance/peer-feedback/received');
+}
+
+// ================================
+// Enhanced Aura with Sub-Metrics
+// ================================
+
+export interface SubMetricDetail {
+    key: string;
+    displayName: string;
+    score: number;
+    source: string;
+    weightInPillar: number;
+    contribution: number;
+}
+
+export interface AutoPillarDetail {
+    name: string;
+    weight: number;
+    score: number;
+    contribution: number;
+    dataSource: string;
+    autoCalculatedCount?: number;
+    manualRatingCount?: number;
+    subMetrics: SubMetricDetail[];
+}
+
+export interface AutoAuraResponse {
+    employeeId: string;
+    employeeName: string;
+    department: string;
+    departmentProfile: string; // e.g., "Engineering", "Sales"
+    auraScore: number;
+    grade: string;
+    qgpa: number;
+    quarterStart: string;
+    automationRate: number; // e.g., 80 for 80%
+    calculatedAt: string;
+    pillars: Record<string, AutoPillarDetail>;
+}
+
+export interface DepartmentKpi {
+    key: string;
+    name: string;
+    automationRate: number;
+    totalMetrics: number;
+    autoMetrics: number;
+}
+
+export interface DepartmentKpisResponse {
+    departments: DepartmentKpi[];
+    message: string;
+}
+
+// Get auto-calculated Aura with department-specific KPIs
+export async function getMyAutoAura(): Promise<AutoAuraResponse> {
+    return authFetch<AutoAuraResponse>('/api/performance/my-aura/auto');
+}
+
+// Get auto-calculated Aura for a specific employee
+export async function getEmployeeAutoAura(employeeId: string): Promise<AutoAuraResponse> {
+    return authFetch<AutoAuraResponse>(`/api/performance/employee/${employeeId}/aura/auto`);
+}
+
+// Get available department KPI profiles
+export async function getDepartmentKpis(): Promise<DepartmentKpisResponse> {
+    return authFetch<DepartmentKpisResponse>('/api/performance/department-kpis');
+}
+
+// Trigger auto-recalculation for all employees
+export async function triggerAutoRecalculation(): Promise<{ message: string; note: string }> {
+    return authFetch<{ message: string; note: string }>('/api/performance/auto-recalculate', {
+        method: 'POST',
+    });
+}
+
+// ==================== TEAM KPIs ====================
+
+export interface TeamKpi {
+    id: string;
+    teamLeadId: string;
+    department: string;
+    name: string;
+    description: string;
+    targetValue: number;
+    targetUnit: string;
+    weight: number;
+    quarter: string;
+    year: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface KpiCreateRequest {
+    name: string;
+    description?: string;
+    targetValue: number;
+    targetUnit: string;
+    weight: number;
+    quarter: string;
+    year: number;
+}
+
+export interface KpiUpdateRequest {
+    name?: string;
+    description?: string;
+    targetValue?: number;
+    targetUnit?: string;
+    weight?: number;
+    isActive?: boolean;
+}
+
+export interface KpiProgressItem {
+    kpiId: string;
+    achievedValue: number;
+    notes?: string;
+}
+
+export interface WeeklyProgressRequest {
+    weekNumber?: number;
+    year?: number;
+    progress: KpiProgressItem[];
+}
+
+export interface WeeklyKpiProgress {
+    id: string;
+    kpiId: string;
+    reportedBy: string;
+    weekNumber: number;
+    year: number;
+    achievedValue: number;
+    progressPercentage: number;
+    notes: string;
+    createdAt: string;
+}
+
+export interface AiInsight {
+    id: string;
+    weekNumber: number;
+    quarter: string;
+    year: number;
+    kpiScore: number;
+    summary: string;
+    insights: {
+        topPerforming?: string[];
+        needsAttention?: string[];
+        achievements?: string[];
+        challenges?: string[];
+    };
+    recommendations: {
+        items?: string[];
+        nextQuarterFocus?: string[];
+    };
+    riskAlerts: {
+        items?: string[];
+    };
+    generatedAt: string;
+    department: string;
+}
+
+export interface TeamQuarterlyScore {
+    id: string;
+    teamName: string;
+    department: string;
+    quarter: string;
+    year: number;
+    kpiAchievementScore: number;
+    overallTeamScore: number;
+    grade: string;
+    aiSummary: string;
+}
+
+// Get my KPIs
+export async function getMyKpis(quarter?: string, year?: number): Promise<{
+    kpis: TeamKpi[];
+    quarter: string;
+    year: number;
+    totalWeight: number;
+    remainingWeight: number;
+}> {
+    const params = new URLSearchParams();
+    if (quarter) params.set('quarter', quarter);
+    if (year) params.set('year', year.toString());
+    return authFetch(`/api/kpi/my-kpis?${params.toString()}`);
+}
+
+// Create a KPI
+export async function createKpi(data: KpiCreateRequest): Promise<{ success: boolean; message: string; kpi: TeamKpi }> {
+    return authFetch('/api/kpi', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+// Update a KPI
+export async function updateKpi(kpiId: string, data: KpiUpdateRequest): Promise<{ success: boolean; message: string; kpi: TeamKpi }> {
+    return authFetch(`/api/kpi/${kpiId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+}
+
+// Delete a KPI
+export async function deleteKpi(kpiId: string): Promise<{ success: boolean; message: string }> {
+    return authFetch(`/api/kpi/${kpiId}`, {
+        method: 'DELETE',
+    });
+}
+
+// Submit weekly progress
+export async function submitKpiProgress(data: WeeklyProgressRequest): Promise<{
+    success: boolean;
+    message: string;
+    weekNumber: number;
+    progress: WeeklyKpiProgress[];
+}> {
+    return authFetch('/api/kpi/progress', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+// Get weekly progress
+export async function getKpiProgress(weekNumber?: number, year?: number): Promise<{
+    weekNumber: number;
+    year: number;
+    progress: WeeklyKpiProgress[];
+}> {
+    const params = new URLSearchParams();
+    if (weekNumber) params.set('weekNumber', weekNumber.toString());
+    if (year) params.set('year', year.toString());
+    return authFetch(`/api/kpi/progress?${params.toString()}`);
+}
+
+// Generate AI insight
+export async function generateAiInsight(weekNumber?: number, year?: number): Promise<{
+    success: boolean;
+    message: string;
+    insight: AiInsight;
+}> {
+    const params = new URLSearchParams();
+    if (weekNumber) params.set('weekNumber', weekNumber.toString());
+    if (year) params.set('year', year.toString());
+    return authFetch(`/api/kpi/insights/generate?${params.toString()}`, {
+        method: 'POST',
+    });
+}
+
+// Get latest AI insight
+export async function getLatestInsight(): Promise<AiInsight | { message: string; tip?: string }> {
+    return authFetch('/api/kpi/insights/latest');
+}
+
+// Get insight history
+export async function getInsightHistory(): Promise<{
+    insights: AiInsight[];
+    total: number;
+}> {
+    return authFetch('/api/kpi/insights/history');
+}
+
+// Calculate team score
+export async function calculateTeamScore(quarter?: string, year?: number): Promise<{
+    success: boolean;
+    message: string;
+    score: TeamQuarterlyScore;
+}> {
+    const params = new URLSearchParams();
+    if (quarter) params.set('quarter', quarter);
+    if (year) params.set('year', year.toString());
+    return authFetch(`/api/kpi/score/calculate?${params.toString()}`, {
+        method: 'POST',
+    });
+}
+
+// Get my team score
+export async function getMyTeamScore(quarter?: string, year?: number): Promise<TeamQuarterlyScore | { message: string }> {
+    const params = new URLSearchParams();
+    if (quarter) params.set('quarter', quarter);
+    if (year) params.set('year', year.toString());
+    return authFetch(`/api/kpi/score/my-team?${params.toString()}`);
+}
+
+// Get all team scores (for overview)
+export async function getAllTeamScores(quarter?: string, year?: number): Promise<{
+    quarter: string;
+    year: number;
+    teams: TeamQuarterlyScore[];
+    totalTeams: number;
+    averageScore: number;
+}> {
+    const params = new URLSearchParams();
+    if (quarter) params.set('quarter', quarter);
+    if (year) params.set('year', year.toString());
+    return authFetch(`/api/kpi/score/all-teams?${params.toString()}`);
+}
+
+// ==================== PERSONAL INSIGHTS ====================
+
+export interface PersonalPerformanceData {
+    totalTasks: number;
+    completedTasks: number;
+    completionRate: number;
+    onTimeTasks: number;
+    onTimeRate: number;
+    avgQualityRating: number;
+    ratedTasks: number;
+    avgResponseDays: number;
+    attendanceDays: number;
+    onTimeCheckIns: number;
+    punctualityRate: number;
+    certificatesThisQuarter: number;
+    strengths: string[];
+    improvements: string[];
+    department: string;
+    employeeName: string;
+}
+
+export interface PersonalAiInsights {
+    overallAssessment: string;
+    performanceScore: number;
+    keyStrengths: string[];
+    improvementAreas: string[];
+    actionableRecommendations: string[];
+    skillsToFocus: string[];
+    motivationalMessage: string;
+}
+
+export interface PersonalInsightsResponse {
+    employeeId: string;
+    employeeName: string;
+    department: string;
+    generatedAt: string;
+    performanceData: PersonalPerformanceData;
+    aiInsights: PersonalAiInsights;
+    aiError?: string;
+}
+
+// Get personal insights for a specific employee
+export async function getEmployeeInsights(employeeId: string): Promise<PersonalInsightsResponse> {
+    return authFetch(`/api/kpi/insights/employee/${employeeId}`);
+}
+
+// Get team insight for department
+export async function getTeamInsight(): Promise<AiInsight | { message: string }> {
+    return authFetch('/api/kpi/insights/team');
 }
