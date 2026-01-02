@@ -130,6 +130,7 @@ export default function TaskManagementPage() {
         assigneeId: '',
         priority: 'Medium' as TaskPriority,
         dueDate: '',
+        dueTime: '',
         tags: '' as string,
     });
 
@@ -270,6 +271,7 @@ export default function TaskManagementPage() {
                 organization: department, // Use logged-in user's department
                 priority: newTask.priority,
                 dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : undefined,
+                dueTime: newTask.dueTime || undefined,
                 tags: newTask.tags ? [newTask.tags] : undefined,
             });
 
@@ -281,6 +283,7 @@ export default function TaskManagementPage() {
                 assigneeId: '',
                 priority: 'Medium',
                 dueDate: '',
+                dueTime: '',
                 tags: '',
             });
             await refreshTasks();
@@ -688,8 +691,8 @@ export default function TaskManagementPage() {
                                 </div>
                             </div>
 
-                            {/* Due Date and Tags */}
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            {/* Due Date, Time and Tags */}
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div>
                                     <label className="mb-1.5 block text-xs font-medium text-gray-700">
                                         Due Date
@@ -698,6 +701,18 @@ export default function TaskManagementPage() {
                                         type="date"
                                         value={newTask.dueDate}
                                         onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
+                                        className="w-full rounded-lg border border-border/40 bg-white px-3 py-2 text-sm outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-medium text-gray-700">
+                                        Due Time
+                                    </label>
+                                    <input
+                                        type="time"
+                                        value={newTask.dueTime}
+                                        onChange={e => setNewTask({ ...newTask, dueTime: e.target.value })}
                                         className="w-full rounded-lg border border-border/40 bg-white px-3 py-2 text-sm outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                                     />
                                 </div>

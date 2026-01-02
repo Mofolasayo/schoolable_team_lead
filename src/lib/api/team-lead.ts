@@ -165,6 +165,7 @@ export interface CreateTaskRequest {
     organization: string; // Department - required for team filtering
     priority: string;
     dueDate?: string;
+    dueTime?: string; // HH:mm format
     tags?: string[];
 }
 

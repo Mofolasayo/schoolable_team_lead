@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   Lightbulb,
   Users,
-  BarChart3,
   RefreshCw,
   ChevronRight,
   Star,
@@ -21,11 +20,12 @@ import {
   generateAiInsight,
   getMyTeamScore,
   getEmployeeInsights,
+  getTeamMembers,
   type AiInsight,
   type TeamQuarterlyScore,
   type PersonalInsightsResponse,
+  type TeamMember,
 } from '@/lib/api/team-lead';
-import { getMyTeam, type TeamMember } from '@/lib/api/team-lead';
 
 export default function InsightsPage() {
   const [teamInsight, setTeamInsight] = useState<AiInsight | null>(null);
@@ -50,7 +50,7 @@ export default function InsightsPage() {
         getLatestInsight(),
         getInsightHistory(),
         getMyTeamScore(),
-        getMyTeam(),
+        getTeamMembers(false), // Don't include self in team members list
       ]);
 
       if ('summary' in insightRes) {
@@ -63,7 +63,7 @@ export default function InsightsPage() {
         setTeamScore(scoreRes);
       }
 
-      setTeamMembers(teamRes.team || []);
+      setTeamMembers(teamRes.members || []);
     } catch (err) {
       console.error('Error fetching insights:', err);
       setError('Failed to load insights');
@@ -348,19 +348,19 @@ export default function InsightsPage() {
                   key={member.id}
                   onClick={() => handleSelectMember(member.id)}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${selectedMember === member.id
-                      ? 'bg-purple-500/10 border border-purple-500/30'
-                      : 'bg-muted/30 hover:bg-muted/50'
+                    ? 'bg-purple-500/10 border border-purple-500/30'
+                    : 'bg-muted/30 hover:bg-muted/50'
                     }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium">
-                    {member.firstName?.[0]}{member.lastName?.[0]}
+                    {member.full_name?.split(' ').map(n => n[0]).join('').substring(0, 2)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {member.firstName} {member.lastName}
+                      {member.full_name}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {member.jobTitle || member.email}
+                      {member.job_title || member.email}
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
