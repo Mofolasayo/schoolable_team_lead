@@ -75,14 +75,24 @@ export default function InsightsPage() {
   const handleGenerateInsight = async () => {
     try {
       setGenerating(true);
+      setError(null);
       const result = await generateAiInsight();
       if (result.insight) {
         setTeamInsight(result.insight);
         fetchData();
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error generating insight:', err);
-      setError('Failed to generate insight');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate insight';
+
+      // Handle specific error cases with friendly messages
+      if (errorMessage.toLowerCase().includes('no kpis')) {
+        setError('No KPIs defined yet. Create some KPIs first to generate insights.');
+      } else if (errorMessage.toLowerCase().includes('no data')) {
+        setError('Not enough data to generate insights. Submit some weekly progress first.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setGenerating(false);
     }
@@ -146,6 +156,20 @@ export default function InsightsPage() {
           Generate New Insight
         </button>
       </header>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-medium text-amber-800">Unable to generate insights</h3>
+            <p className="text-sm text-amber-700 mt-1">{error}</p>
+            <a href="/dashboard/kpis" className="text-sm text-amber-800 font-medium underline mt-2 inline-block">
+              Go to KPIs →
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Team Score Card */}
       {teamScore && (

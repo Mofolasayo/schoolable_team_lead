@@ -9,7 +9,7 @@ const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://schoolable-back
  */
 async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
+    const token = cookieStore.get('teamlead-auth-token')?.value;
 
     if (!token) {
         throw new Error('No authentication token found');

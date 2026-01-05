@@ -3,12 +3,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, HelpCircle, Menu, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { Bell, HelpCircle, Menu, ChevronDown, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 import { dashboardNavigation } from '@/config/navigation';
 import { cn } from '@/lib/utils';
-// import { WebSocketWrapper } from '@/lib/websocket-wrapper';
+import { logout } from '@/app/login/actions';
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -21,8 +21,64 @@ type DashboardLayoutProps = {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [user, setUser] = useState<{
+    id: string;
+    employeeId?: string | null;
+    email?: string | null;
+    fullName?: string | null;
+    role?: string | null;
+    department?: string | null;
+    gender?: string | null;
+    isTeamLead?: boolean;
+    avatarUrl?: string | null;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Generate avatar URL matching mobile app logic
+  const getAvatarUrl = (gender?: string | null, seed?: string | null) => {
+    const avatarSeed = seed || user?.employeeId || user?.email || 'User';
+    let style = 'bottts'; // Default for unspecified gender
+    if (gender?.toLowerCase() === 'male') {
+      style = 'adventurer';
+    } else if (gender?.toLowerCase() === 'female') {
+      style = 'adventurer-neutral';
+    }
+    return `https://api.dicebear.com/7.x/${style}/svg?seed=${avatarSeed}`;
+  };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        // Read user info from cookie (set by login action)
+        const userInfoCookie = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('teamlead-user-info='));
+
+        if (userInfoCookie) {
+          const cookieValue = userInfoCookie.split('=')[1];
+          if (cookieValue) {
+            const userInfo = JSON.parse(decodeURIComponent(cookieValue));
+            setUser({
+              id: userInfo.id,
+              employeeId: userInfo.employeeId || userInfo.id,
+              email: userInfo.email,
+              fullName: userInfo.fullName,
+              role: userInfo.role,
+              department: userInfo.department,
+              gender: userInfo.gender,
+              isTeamLead: userInfo.isTeamLead,
+              avatarUrl: userInfo.avatarUrl,
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing user info:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const toggleMobileNav = () => setMobileNavOpen((open) => !open);
 
@@ -67,7 +123,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    // <WebSocketWrapper>
     <div className="flex min-h-screen bg-[#F8FAFC]">
       {/* Sidebar - Fixed Width 220px */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[220px] flex-col border-r border-border/40 bg-white lg:flex">
@@ -151,25 +206,59 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <HelpCircle className="h-5 w-5" />
             </button>
 
-            <button
-              type="button"
-              className="ml-2 flex items-center gap-3 rounded-md border border-border/40 bg-white py-1.5 pl-2 pr-3 hover:bg-muted/50"
-            >
-              <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Team Lead`}
-                alt="Team Lead"
-                className="h-7 w-7 rounded-full object-cover ring-2 ring-gray-50"
-              />
-              <div className="hidden flex-col items-start text-left md:flex">
-                <span className="text-sm font-medium text-gray-700">
-                  Team Lead
-                </span>
-                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                  Team Lead
-                </span>
+            {isLoading ? (
+              <div className="ml-2 flex items-center gap-3 rounded-md border border-border/40 bg-white py-1.5 pl-2 pr-3">
+                <div className="h-7 w-7 animate-pulse rounded-full bg-slate-200" />
+                <div className="hidden flex-col items-start gap-1 md:flex">
+                  <div className="h-3 w-24 animate-pulse rounded bg-slate-200" />
+                  <div className="h-2 w-16 animate-pulse rounded bg-slate-200" />
+                </div>
               </div>
-              <ChevronDown className="hidden h-3 w-3 text-muted-foreground md:inline" />
-            </button>
+            ) : (
+              <div className="relative group">
+                <button
+                  className="ml-2 flex items-center gap-3 rounded-md border border-border/40 bg-white py-1.5 pl-2 pr-3 hover:bg-muted/50"
+                >
+                  <img
+                    src={user?.avatarUrl || getAvatarUrl(user?.gender, user?.employeeId)}
+                    alt={user?.fullName || 'Team Lead'}
+                    className="h-7 w-7 rounded-full object-cover ring-2 ring-gray-50"
+                  />
+                  <div className="hidden flex-col items-start text-left md:flex">
+                    <span className="text-sm font-medium text-gray-700">
+                      {user?.fullName || user?.email || 'Team Lead'}
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                      {user?.isTeamLead ? 'Team Lead' : user?.role || 'Team Lead'}
+                    </span>
+                  </div>
+                  <ChevronDown className="hidden h-3 w-3 text-muted-foreground md:inline group-hover:rotate-180 transition-transform" />
+                </button>
+
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 top-full mt-2 w-56 rounded-md border border-border/40 bg-white p-2 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <Link
+                    href="/dashboard/settings"
+                    className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-slate-50"
+                    onClick={() => setMobileNavOpen(false)}
+                  >
+                    <img
+                      src={user?.avatarUrl || getAvatarUrl(user?.gender, user?.employeeId)}
+                      className="h-4 w-4 rounded-full"
+                      alt=""
+                    />
+                    Profile Settings
+                  </Link>
+                  <div className="my-1 h-px bg-slate-100" />
+                  <form action={logout}>
+                    <button type="submit" className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                      <LogOut size={16} />
+                      Sign Out
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
@@ -200,6 +289,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
     </div>
-    // </WebSocketWrapper >
   );
 }
+

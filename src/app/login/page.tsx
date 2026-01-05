@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Eye, EyeOff, Loader2, AlertCircle, Users } from 'lucide-react';
+import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 
 function LoginForm() {
     const [error, setError] = useState<string | null>(null);
@@ -43,9 +43,12 @@ function LoginForm() {
         <Card className="w-full max-w-md shadow-xl border-0">
             <CardHeader className="space-y-4 pb-6">
                 <div className="mb-2 flex justify-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
-                        <Users className="h-8 w-8 text-white" />
-                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/schoolable_logo.png"
+                        alt="Schoolable"
+                        className="h-16 w-auto object-contain"
+                    />
                 </div>
                 <div className="text-center">
                     <CardTitle className="text-2xl font-bold text-slate-900">

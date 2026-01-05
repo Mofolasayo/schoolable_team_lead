@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+// Cookie names specific to Team Lead Dashboard
+const AUTH_TOKEN_COOKIE = 'teamlead-auth-token';
+const USER_INFO_COOKIE = 'teamlead-user-info';
+
 /**
  * Middleware to protect Team Lead dashboard routes
  * Checks for auth-token cookie and validates team lead role
@@ -12,8 +16,8 @@ export async function middleware(request: NextRequest) {
     const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
 
     // Check for auth token
-    const authToken = request.cookies.get('auth-token')?.value;
-    const userInfo = request.cookies.get('user-info')?.value;
+    const authToken = request.cookies.get(AUTH_TOKEN_COOKIE)?.value;
+    const userInfo = request.cookies.get(USER_INFO_COOKIE)?.value;
 
     // Redirect to login if accessing protected route without token
     if (!isPublicPath && !authToken) {
@@ -31,16 +35,16 @@ export async function middleware(request: NextRequest) {
                 loginUrl.searchParams.set('error', 'Access denied. Team Leads only.');
                 // Clear invalid cookies
                 const response = NextResponse.redirect(loginUrl);
-                response.cookies.delete('auth-token');
-                response.cookies.delete('user-info');
+                response.cookies.delete(AUTH_TOKEN_COOKIE);
+                response.cookies.delete(USER_INFO_COOKIE);
                 return response;
             }
         } catch {
             // Invalid user info, redirect to login
             const loginUrl = new URL('/login', request.url);
             const response = NextResponse.redirect(loginUrl);
-            response.cookies.delete('auth-token');
-            response.cookies.delete('user-info');
+            response.cookies.delete(AUTH_TOKEN_COOKIE);
+            response.cookies.delete(USER_INFO_COOKIE);
             return response;
         }
     }

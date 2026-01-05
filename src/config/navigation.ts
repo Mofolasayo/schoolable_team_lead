@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone, LucideIcon, Brain } from 'lucide-react';
+import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone, LucideIcon, Brain, BarChart3, UserCheck, ClipboardList } from 'lucide-react';
 
 export interface NavigationItem {
   title: string;
@@ -36,6 +36,30 @@ export const dashboardNavigation: NavigationItem[] = [
     title: 'AI Insights',
     href: '/dashboard/insights',
     icon: Brain,
+    section: 'main',
+  },
+  {
+    title: 'Analytics',
+    href: '/dashboard/analytics',
+    icon: BarChart3,
+    section: 'main',
+  },
+  {
+    title: 'Give Feedback',
+    href: '/dashboard/peer-feedback',
+    icon: UserCheck,
+    section: 'main',
+  },
+  {
+    title: 'Feedback Status',
+    href: '/dashboard/peer-feedback-status',
+    icon: ClipboardList,
+    section: 'main',
+  },
+  {
+    title: 'Feedback Trends',
+    href: '/dashboard/feedback-trends',
+    icon: BarChart3,
     section: 'main',
   },
   {

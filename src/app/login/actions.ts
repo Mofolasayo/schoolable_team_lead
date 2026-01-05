@@ -5,6 +5,10 @@ import { redirect } from 'next/navigation';
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://schoolable-backend.onrender.com';
 
+// Cookie names specific to Team Lead Dashboard
+const AUTH_TOKEN_COOKIE = 'teamlead-auth-token';
+const USER_INFO_COOKIE = 'teamlead-user-info';
+
 export async function login(formData: FormData) {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
@@ -37,7 +41,7 @@ export async function login(formData: FormData) {
 
         // Store the JWT token in an HTTP-only cookie
         const cookieStore = await cookies();
-        cookieStore.set('auth-token', data.token, {
+        cookieStore.set(AUTH_TOKEN_COOKIE, data.token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
@@ -46,13 +50,16 @@ export async function login(formData: FormData) {
         });
 
         // Store user info in a separate cookie (not sensitive)
-        cookieStore.set('user-info', JSON.stringify({
+        cookieStore.set(USER_INFO_COOKIE, JSON.stringify({
             id: profile.id,
+            employeeId: profile.employee_id || profile.id,
             email: profile.email,
             fullName: profile.full_name,
             role: profile.role,
             department: profile.department,
+            gender: profile.gender || null,
             isTeamLead: profile.is_team_lead,
+            avatarUrl: profile.avatar_url || null,
         }), {
             httpOnly: false,
             secure: process.env.NODE_ENV === 'production',
@@ -74,6 +81,9 @@ export async function login(formData: FormData) {
 
 export async function logout() {
     const cookieStore = await cookies();
+    cookieStore.delete(AUTH_TOKEN_COOKIE);
+    cookieStore.delete(USER_INFO_COOKIE);
+    // Also cleanup any legacy cookies
     cookieStore.delete('auth-token');
     cookieStore.delete('user-info');
     redirect('/login');
@@ -81,13 +91,13 @@ export async function logout() {
 
 export async function getAuthToken(): Promise<string | null> {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token');
+    const token = cookieStore.get(AUTH_TOKEN_COOKIE);
     return token?.value || null;
 }
 
 export async function getCurrentUser() {
     const cookieStore = await cookies();
-    const userInfo = cookieStore.get('user-info');
+    const userInfo = cookieStore.get(USER_INFO_COOKIE);
 
     if (!userInfo?.value) {
         return null;
@@ -99,3 +109,4 @@ export async function getCurrentUser() {
         return null;
     }
 }
+

@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState, useEffect, useCallback } from 'react';
-import { CalendarClock, Search, Users, Loader2, Pin, MoreHorizontal } from 'lucide-react';
+import { CalendarClock, Search, Users, Loader2, Pin, MoreHorizontal, Plus, X } from 'lucide-react';
 import {
     getAnnouncements,
     getDashboardStats,
+    createAnnouncement,
     Announcement,
 } from '@/lib/api/team-lead';
 import { toast } from 'sonner';
@@ -27,6 +28,12 @@ export default function AnnouncementsPage() {
     const [isFetching, setIsFetching] = useState(true);
     const [items, setItems] = useState<AnnouncementItem[]>([]);
     const [department, setDepartment] = useState<string>('');
+
+    // Create announcement modal state
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [newTitle, setNewTitle] = useState('');
+    const [newContent, setNewContent] = useState('');
 
     const fetchData = useCallback(async () => {
         try {
@@ -115,6 +122,33 @@ export default function AnnouncementsPage() {
         Draft: 'bg-muted text-gray-700',
     };
 
+    const handleCreateAnnouncement = async () => {
+        if (!newTitle.trim() || !newContent.trim()) {
+            toast.error('Title and content are required');
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            await createAnnouncement({
+                title: newTitle,
+                content: newContent,
+                audience: department || 'All Staff',
+                status: 'Published',
+            });
+            toast.success('Announcement created!');
+            setIsCreateModalOpen(false);
+            setNewTitle('');
+            setNewContent('');
+            fetchData();
+        } catch (err) {
+            console.error('Failed to create announcement:', err);
+            toast.error('Failed to create announcement');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     if (isFetching) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -136,6 +170,13 @@ export default function AnnouncementsPage() {
                         Stay updated with announcements for {department || 'your team'}.
                     </p>
                 </div>
+                <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+                >
+                    <Plus className="h-4 w-4" />
+                    Create Announcement
+                </button>
             </div>
 
             {/* Summary */}
@@ -295,13 +336,6 @@ export default function AnnouncementsPage() {
                                     </p>
                                 </div>
 
-                                {/* Info Note */}
-                                <div className="rounded-lg bg-muted/30 p-4 text-xs text-muted-foreground">
-                                    <p>
-                                        <strong>Note:</strong> Announcements are managed by administrators.
-                                        Contact your admin if you need to create or update team announcements.
-                                    </p>
-                                </div>
                             </div>
                         </div>
                     ) : (
@@ -311,6 +345,63 @@ export default function AnnouncementsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Create Announcement Modal */}
+            {isCreateModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-lg rounded-xl bg-white shadow-2xl">
+                        <div className="flex items-center justify-between border-b border-border/40 p-4">
+                            <h3 className="text-lg font-medium text-gray-800">New Announcement</h3>
+                            <button
+                                onClick={() => setIsCreateModalOpen(false)}
+                                className="text-muted-foreground hover:text-foreground"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="p-4 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input
+                                    type="text"
+                                    value={newTitle}
+                                    onChange={(e) => setNewTitle(e.target.value)}
+                                    placeholder="Announcement title..."
+                                    className="w-full rounded-lg border border-border/40 px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                                <textarea
+                                    value={newContent}
+                                    onChange={(e) => setNewContent(e.target.value)}
+                                    placeholder="Write your announcement..."
+                                    rows={5}
+                                    className="w-full rounded-lg border border-border/40 px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                                />
+                            </div>
+                            <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+                                This announcement will be visible to: <strong className="text-gray-700">{department || 'All Staff'}</strong>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-end gap-3 rounded-b-xl border-t border-border/40 bg-gray-50/50 p-4">
+                            <button
+                                onClick={() => setIsCreateModalOpen(false)}
+                                className="rounded-md border border-border/40 bg-white px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCreateAnnouncement}
+                                disabled={isSubmitting}
+                                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Creating...' : 'Create Announcement'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

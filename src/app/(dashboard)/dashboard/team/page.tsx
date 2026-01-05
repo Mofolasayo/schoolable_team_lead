@@ -5,9 +5,43 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Mail, X, Loader2, AlertCircle, Star } from 'lucide-react';
-import { CustomDialog } from '@/components/ui/custom-dialog';
+import { MessageSquare, Mail, X, Loader2, AlertCircle, Star, ClipboardCopy } from 'lucide-react';
+import { CustomDialog } from '@/components/ui/custom-dialog'
 import { getTeamMembers, TeamMember, TeamMembersResponse } from '@/lib/api/team-lead';
+import { toast } from 'sonner';
+
+// Helper to generate avatar URL matching mobile app logic
+function getAvatarUrl(member: TeamMember): string {
+    // Use avatar_url if provided by backend
+    if (member.avatar_url && member.avatar_url.length > 0) {
+        return member.avatar_url;
+    }
+
+    // Generate DiceBear avatar with gender-based style
+    const seed = member.employee_id || member.email || member.full_name || 'User';
+    // Note: We don't have gender in TeamMember type, so use bottts as default
+    // The backend should now return proper gender-based avatar_url
+    return `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
+}
+
+// Helper to safely extract pillar value (handles both old complex and new simple format)
+function getPillarValue(pillars: TeamMember['pillars'], key: 'technical' | 'behavioral' | 'culture' | 'growth'): number {
+    if (!pillars) return 0;
+
+    const value = pillars[key];
+
+    // If it's a number, return it directly (new format)
+    if (typeof value === 'number') {
+        return value;
+    }
+
+    // If it's an object with a score property (old format), extract the score
+    if (value && typeof value === 'object' && 'score' in value) {
+        return (value as { score: number }).score || 0;
+    }
+
+    return 0;
+}
 
 export default function MyTeamPage() {
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
@@ -107,7 +141,7 @@ export default function MyTeamPage() {
                                     {/* Avatar */}
                                     <div className="relative shrink-0">
                                         <Avatar className={`h-12 w-12 border ${member.is_team_lead ? 'border-indigo-300' : 'border-slate-100'}`}>
-                                            <AvatarImage src={member.avatar_url} />
+                                            <AvatarImage src={getAvatarUrl(member)} />
                                             <AvatarFallback>{member.full_name?.[0] || '?'}</AvatarFallback>
                                         </Avatar>
                                         <span className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white ${member.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'
@@ -195,7 +229,7 @@ export default function MyTeamPage() {
                             {/* Profile Image */}
                             <div className="flex items-end justify-between mb-4">
                                 <Avatar className="h-20 w-20 border-4 border-white shadow-sm bg-white">
-                                    <AvatarImage src={selectedMember.avatar_url} />
+                                    <AvatarImage src={getAvatarUrl(selectedMember)} />
                                     <AvatarFallback>{selectedMember.full_name?.[0]}</AvatarFallback>
                                 </Avatar>
                                 <div className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${selectedMember.status === 'active'
@@ -233,19 +267,19 @@ export default function MyTeamPage() {
                                         <div className="grid grid-cols-2 gap-2 mt-4">
                                             <div className="text-xs">
                                                 <span className="text-slate-500">Technical:</span>
-                                                <span className="ml-1 font-semibold text-slate-700">{selectedMember.pillars.technical}%</span>
+                                                <span className="ml-1 font-semibold text-slate-700">{getPillarValue(selectedMember.pillars, 'technical').toFixed(0)}%</span>
                                             </div>
                                             <div className="text-xs">
                                                 <span className="text-slate-500">Behavioral:</span>
-                                                <span className="ml-1 font-semibold text-slate-700">{selectedMember.pillars.behavioral}%</span>
+                                                <span className="ml-1 font-semibold text-slate-700">{getPillarValue(selectedMember.pillars, 'behavioral').toFixed(0)}%</span>
                                             </div>
                                             <div className="text-xs">
                                                 <span className="text-slate-500">Culture:</span>
-                                                <span className="ml-1 font-semibold text-slate-700">{selectedMember.pillars.culture}%</span>
+                                                <span className="ml-1 font-semibold text-slate-700">{getPillarValue(selectedMember.pillars, 'culture').toFixed(0)}%</span>
                                             </div>
                                             <div className="text-xs">
                                                 <span className="text-slate-500">Growth:</span>
-                                                <span className="ml-1 font-semibold text-slate-700">{selectedMember.pillars.growth}%</span>
+                                                <span className="ml-1 font-semibold text-slate-700">{getPillarValue(selectedMember.pillars, 'growth').toFixed(0)}%</span>
                                             </div>
                                         </div>
                                     )}
@@ -270,11 +304,28 @@ export default function MyTeamPage() {
 
                             {/* Action Buttons */}
                             <div className="flex gap-3 pt-6 mt-4 border-t border-slate-50">
-                                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white">
+                                <Button
+                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
+                                    onClick={() => {
+                                        window.location.href = `mailto:${selectedMember.email}?subject=Message from Team Lead`;
+                                        toast.success('Opening email client...');
+                                    }}
+                                >
                                     <MessageSquare className="mr-2 h-4 w-4" /> Message
                                 </Button>
-                                <Button variant="outline" className="flex-1 border-slate-200">
-                                    View Full Profile
+                                <Button
+                                    variant="outline"
+                                    className="flex-1 border-slate-200"
+                                    onClick={() => {
+                                        // Copy employee details to clipboard
+                                        const details = `${selectedMember.full_name}\n${selectedMember.job_title || 'Team Member'}\n${selectedMember.email}\nEmployee ID: ${selectedMember.employee_id || 'N/A'}\nAura Score: ${selectedMember.aura_score?.toFixed(1) || 'N/A'}/5.0`;
+                                        navigator.clipboard.writeText(details);
+                                        toast.success('Profile details copied to clipboard!', {
+                                            description: 'Employee information has been copied.',
+                                        });
+                                    }}
+                                >
+                                    <ClipboardCopy className="mr-2 h-4 w-4" /> Copy Details
                                 </Button>
                             </div>
                         </div>

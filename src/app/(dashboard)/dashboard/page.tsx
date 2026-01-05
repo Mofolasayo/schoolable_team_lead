@@ -10,6 +10,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getDashboardStats, getTeamMembers, DashboardStats, TeamMember } from '@/lib/api/team-lead';
 import Link from 'next/link';
 
+// Helper to generate avatar URL matching mobile app logic
+function getAvatarUrl(member: TeamMember): string {
+  if (member.avatar_url && member.avatar_url.length > 0) {
+    return member.avatar_url;
+  }
+  const seed = member.employee_id || member.email || member.full_name || 'User';
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -102,9 +111,9 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-medium text-slate-500">Team Members</h3>
-              <div className="text-2xl font-bold text-slate-900">{stats?.team_size || 0}</div>
+              <div className="text-2xl font-bold text-slate-900">{stats?.team_size || teamMembers.length || 0}</div>
             </div>
-            <p className="text-xs text-slate-400 mt-2">{stats?.department}</p>
+            <p className="text-xs text-slate-400 mt-2">{stats?.department || 'Your Team'}</p>
           </CardContent>
         </Card>
 
@@ -227,7 +236,7 @@ export default function DashboardPage() {
                     {pendingReports.slice(0, 3).map((member) => (
                       <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg bg-slate-50">
                         <Avatar className="h-6 w-6">
-                          <AvatarImage src={member.avatar_url} />
+                          <AvatarImage src={getAvatarUrl(member)} />
                           <AvatarFallback className="text-[9px]">{member.full_name?.[0]}</AvatarFallback>
                         </Avatar>
                         <span className="text-xs text-slate-600">{member.full_name}</span>
@@ -272,7 +281,7 @@ export default function DashboardPage() {
             {teamMembers.slice(0, 6).map((member) => (
               <div key={member.id} className="flex flex-col items-center text-center p-3 rounded-lg hover:bg-slate-50 transition-colors">
                 <Avatar className="h-12 w-12 mb-2">
-                  <AvatarImage src={member.avatar_url} />
+                  <AvatarImage src={getAvatarUrl(member)} />
                   <AvatarFallback>{member.full_name?.[0]}</AvatarFallback>
                 </Avatar>
                 <p className="text-xs font-medium text-slate-900 truncate w-full">{member.full_name}</p>
