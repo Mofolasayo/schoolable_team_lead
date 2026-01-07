@@ -138,6 +138,56 @@ export async function getWeeklyReportStatus(
 }
 
 // ================================
+// Peer Feedback Status
+// ================================
+
+export interface AggregatedScores {
+    overall: number;
+    support: number;
+    collaboration: number;
+    adaptability: number;
+    values: number;
+    accountability: number;
+    feedback_openness: number;
+}
+
+export interface PeerFeedbackMemberStatus {
+    id: string;
+    full_name: string;
+    job_title: string | null;
+    department: string;
+    avatar_url: string | null;
+    has_submitted_feedback: boolean;
+    feedback_received_count: number;
+    aggregated_scores?: AggregatedScores;
+}
+
+export interface PeerFeedbackStatusResponse {
+    team_lead_id: string;
+    week: number;
+    year: number;
+    team_size: number;
+    submitted_count: number;
+    pending_count: number;
+    completion_rate: number;
+    members: PeerFeedbackMemberStatus[];
+}
+
+export async function getPeerFeedbackStatus(
+    week?: number,
+    year?: number
+): Promise<PeerFeedbackStatusResponse> {
+    const params = new URLSearchParams();
+    if (week) params.set('week', week.toString());
+    if (year) params.set('year', year.toString());
+
+    const queryString = params.toString();
+    const endpoint = `/api/team-lead/peer-feedback-status${queryString ? `?${queryString}` : ''}`;
+
+    return authFetch<PeerFeedbackStatusResponse>(endpoint);
+}
+
+// ================================
 // Tasks (using existing endpoints)
 // ================================
 

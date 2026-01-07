@@ -25,8 +25,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-    getTeamMembers,
-    TeamMember as ApiTeamMember
+    getPeerFeedbackStatus,
+    PeerFeedbackMemberStatus
 } from "@/lib/api/team-lead";
 
 // Types
@@ -72,29 +72,26 @@ export default function PeerFeedbackStatusPage() {
     const fetchFeedbackStatus = async () => {
         setIsLoading(true);
         try {
-            // Fetch team members and their feedback status
-            const data = await getTeamMembers(true);
+            // Fetch real peer feedback status from API
+            const data = await getPeerFeedbackStatus();
 
-            // Map to feedback status format with mock aggregated scores
-            // In production, this would come from backend API
-            const members: TeamMemberFeedbackStatus[] = data.members.map((m: ApiTeamMember, index: number) => ({
+            // Map API response to our local interface
+            const members: TeamMemberFeedbackStatus[] = data.members.map((m: PeerFeedbackMemberStatus) => ({
                 id: m.id,
                 name: m.full_name,
                 role: m.job_title || 'Team Member',
                 department: m.department,
-                avatarUrl: m.avatar_url,
-                // Mock status - in production this would come from API
-                hasSubmittedFeedback: index % 3 !== 0, // Mock: 2 out of 3 have submitted
-                feedbackSubmittedAt: index % 3 !== 0 ? new Date(Date.now() - Math.random() * 86400000 * 7).toISOString() : undefined,
-                feedbackReceivedCount: Math.floor(Math.random() * 5) + 1,
-                aggregatedScores: index % 3 !== 0 ? {
-                    support: +(3 + Math.random() * 2).toFixed(1),
-                    collaboration: +(3 + Math.random() * 2).toFixed(1),
-                    adaptability: +(3 + Math.random() * 2).toFixed(1),
-                    values: +(3 + Math.random() * 2).toFixed(1),
-                    accountability: +(3 + Math.random() * 2).toFixed(1),
-                    feedback_openness: +(3 + Math.random() * 2).toFixed(1),
-                    overall: +(3.5 + Math.random() * 1.5).toFixed(1),
+                avatarUrl: m.avatar_url || undefined,
+                hasSubmittedFeedback: m.has_submitted_feedback,
+                feedbackReceivedCount: m.feedback_received_count,
+                aggregatedScores: m.aggregated_scores ? {
+                    support: m.aggregated_scores.support,
+                    collaboration: m.aggregated_scores.collaboration,
+                    adaptability: m.aggregated_scores.adaptability,
+                    values: m.aggregated_scores.values,
+                    accountability: m.aggregated_scores.accountability,
+                    feedback_openness: m.aggregated_scores.feedback_openness,
+                    overall: m.aggregated_scores.overall,
                 } : undefined,
             }));
 
