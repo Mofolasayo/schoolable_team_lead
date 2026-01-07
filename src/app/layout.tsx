@@ -7,8 +7,13 @@ import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Allpro_wallet',
-  description: 'Built with Next.js, TypeScript, and Shadcn/ui',
+  title: 'Schoolable | Team Lead Dashboard',
+  description: 'Team Lead Dashboard for Schoolable HR Platform',
+  icons: {
+    icon: '/schoolable_logo.png',
+    shortcut: '/schoolable_logo.png',
+    apple: '/schoolable_logo.png',
+  },
 };
 
 export default function RootLayout({

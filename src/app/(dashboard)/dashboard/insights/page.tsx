@@ -14,6 +14,7 @@ import {
   Target,
   Sparkles
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   getLatestInsight,
   getInsightHistory,
@@ -26,6 +27,15 @@ import {
   type PersonalInsightsResponse,
   type TeamMember,
 } from '@/lib/api/team-lead';
+
+// Helper to generate avatar URL matching mobile app logic
+function getAvatarUrl(member: TeamMember): string {
+  if (member.avatar_url && member.avatar_url.length > 0) {
+    return member.avatar_url;
+  }
+  const seed = member.employee_id || member.email || member.full_name || 'User';
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
+}
 
 export default function InsightsPage() {
   const [teamInsight, setTeamInsight] = useState<AiInsight | null>(null);
@@ -273,15 +283,19 @@ export default function InsightsPage() {
                     <span className="font-medium text-sm">Recommendations</span>
                   </div>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    {(typeof teamInsight.recommendations === 'string'
-                      ? JSON.parse(teamInsight.recommendations)
-                      : teamInsight.recommendations
-                    )?.map((rec: string, i: number) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <Target className="h-3 w-3 mt-1 text-blue-500" />
-                        {rec}
-                      </li>
-                    ))}
+                    {(() => {
+                      const recs = typeof teamInsight.recommendations === 'string'
+                        ? JSON.parse(teamInsight.recommendations)
+                        : teamInsight.recommendations;
+                      // Handle both array format and object format ({items: [...]})
+                      const items = Array.isArray(recs) ? recs : (recs?.items || []);
+                      return items.map((rec: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <Target className="h-3 w-3 mt-1 text-blue-500" />
+                          {rec}
+                        </li>
+                      ));
+                    })()}
                   </ul>
                 </div>
               )}
@@ -294,15 +308,19 @@ export default function InsightsPage() {
                     <span className="font-medium text-sm">Risk Alerts</span>
                   </div>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    {(typeof teamInsight.riskAlerts === 'string'
-                      ? JSON.parse(teamInsight.riskAlerts)
-                      : teamInsight.riskAlerts
-                    )?.map((alert: string, i: number) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <AlertTriangle className="h-3 w-3 mt-1 text-red-500" />
-                        {alert}
-                      </li>
-                    ))}
+                    {(() => {
+                      const alerts = typeof teamInsight.riskAlerts === 'string'
+                        ? JSON.parse(teamInsight.riskAlerts)
+                        : teamInsight.riskAlerts;
+                      // Handle both array format and object format ({items: [...]})
+                      const items = Array.isArray(alerts) ? alerts : (alerts?.items || []);
+                      return items.map((alert: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <AlertTriangle className="h-3 w-3 mt-1 text-red-500" />
+                          {alert}
+                        </li>
+                      ));
+                    })()}
                   </ul>
                 </div>
               )}
@@ -376,9 +394,12 @@ export default function InsightsPage() {
                     : 'bg-muted/30 hover:bg-muted/50'
                     }`}
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium">
-                    {member.full_name?.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                  </div>
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={getAvatarUrl(member)} />
+                    <AvatarFallback className="text-xs">
+                      {member.full_name?.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
                       {member.full_name}

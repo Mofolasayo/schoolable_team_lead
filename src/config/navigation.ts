@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone, LucideIcon, Brain, BarChart3, UserCheck, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone, LucideIcon, Brain, BarChart3, ClipboardList, Target, CalendarDays } from 'lucide-react';
 
 export interface NavigationItem {
   title: string;
@@ -33,6 +33,12 @@ export const dashboardNavigation: NavigationItem[] = [
     section: 'main',
   },
   {
+    title: 'Daily Reports',
+    href: '/dashboard/daily-reports',
+    icon: CalendarDays,
+    section: 'main',
+  },
+  {
     title: 'AI Insights',
     href: '/dashboard/insights',
     icon: Brain,
@@ -45,23 +51,24 @@ export const dashboardNavigation: NavigationItem[] = [
     section: 'main',
   },
   {
-    title: 'Give Feedback',
-    href: '/dashboard/peer-feedback',
-    icon: UserCheck,
+    title: 'Team KPIs',
+    href: '/dashboard/kpis',
+    icon: Target,
+    section: 'main',
+  },
+  {
+    title: 'Individual KPIs',
+    href: '/dashboard/individual-kpis',
+    icon: ClipboardList,
     section: 'main',
   },
   {
     title: 'Feedback Status',
     href: '/dashboard/peer-feedback-status',
-    icon: ClipboardList,
+    icon: Users,
     section: 'main',
   },
-  {
-    title: 'Feedback Trends',
-    href: '/dashboard/feedback-trends',
-    icon: BarChart3,
-    section: 'main',
-  },
+
   {
     title: 'Announcements',
     href: '/dashboard/announcements',

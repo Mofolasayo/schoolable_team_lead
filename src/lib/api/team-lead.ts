@@ -750,3 +750,189 @@ export async function getEmployeeInsights(employeeId: string): Promise<PersonalI
 export async function getTeamInsight(): Promise<AiInsight | { message: string }> {
     return authFetch('/api/kpi/insights/team');
 }
+
+// ================================
+// Individual KPIs
+// ================================
+
+export interface IndividualKpi {
+    id: string;
+    employeeId: string;
+    setById: string;
+    department: string | null;
+    name: string;
+    description: string | null;
+    targetValue: number;
+    currentValue: number;
+    targetUnit: string | null;
+    weight: number;
+    quarter: string;
+    year: number;
+    isActive: boolean;
+    achievementPercentage: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface EmployeeKpis {
+    employeeId: string;
+    employeeName: string;
+    employeeEmail: string | null;
+    employeeRole: string | null;
+    kpis: IndividualKpi[];
+    totalWeight: number;
+    isComplete: boolean;
+}
+
+export interface TeamKpisResponse {
+    quarter: string;
+    year: number;
+    employees: EmployeeKpis[];
+}
+
+export interface PendingSetupResponse {
+    quarter: string;
+    year: number;
+    pendingCount: number;
+    employees: {
+        id: string;
+        name: string;
+        email: string;
+        role: string | null;
+    }[];
+}
+
+export interface CreateIndividualKpiRequest {
+    employeeId: string;
+    name: string;
+    description?: string;
+    targetValue: number;
+    targetUnit?: string;
+    weight: number;
+    quarter?: string;
+    year?: number;
+}
+
+export interface UpdateIndividualKpiRequest {
+    name?: string;
+    description?: string;
+    targetValue?: number;
+    currentValue?: number;
+    targetUnit?: string;
+    weight?: number;
+    isActive?: boolean;
+}
+
+// Get all individual KPIs set by this team lead for their team
+export async function getTeamIndividualKpis(quarter?: string, year?: number): Promise<TeamKpisResponse> {
+    const params = new URLSearchParams();
+    if (quarter) params.append('quarter', quarter);
+    if (year) params.append('year', year.toString());
+    const queryString = params.toString();
+    return authFetch(`/api/individual-kpis/my-team${queryString ? `?${queryString}` : ''}`);
+}
+
+// Get team members who don't have KPIs set yet
+export async function getPendingKpiSetup(quarter?: string, year?: number): Promise<PendingSetupResponse> {
+    const params = new URLSearchParams();
+    if (quarter) params.append('quarter', quarter);
+    if (year) params.append('year', year.toString());
+    const queryString = params.toString();
+    return authFetch(`/api/individual-kpis/pending-setup${queryString ? `?${queryString}` : ''}`);
+}
+
+// Create an individual KPI for a team member
+export async function createIndividualKpi(data: CreateIndividualKpiRequest): Promise<{ success: boolean; message: string; kpi: IndividualKpi }> {
+    return authFetch('/api/individual-kpis', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+// Update an individual KPI
+export async function updateIndividualKpi(kpiId: string, data: UpdateIndividualKpiRequest): Promise<{ success: boolean; message: string; kpi: IndividualKpi }> {
+    return authFetch(`/api/individual-kpis/${kpiId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+}
+
+// Delete an individual KPI
+export async function deleteIndividualKpi(kpiId: string): Promise<{ success: boolean; message: string }> {
+    return authFetch(`/api/individual-kpis/${kpiId}`, {
+        method: 'DELETE',
+    });
+}
+
+// ================================
+// Daily Reports (Team Lead)
+// ================================
+
+export interface DailyReport {
+    id: number;
+    employeeId: string;
+    reportDate: string;
+    tasksCompleted: string;
+    tasksInProgress: string | null;
+    blockers: string | null;
+    plannedForTomorrow: string | null;
+    additionalNotes: string | null;
+    aiScore: number | null;
+    aiFeedback: string | null;
+    aiSuggestions: string | null; // JSON array of AI-generated suggestions for tomorrow
+    aiGradedAt: string | null;
+    kpiAlignmentScore: number | null;
+    status: string;
+    reviewedBy: string | null;
+    reviewedAt: string | null;
+    reviewerNotes: string | null;
+    reviewerScore: number | null;
+    finalScore: number | null;
+    createdAt: string;
+}
+
+export interface EmployeeDailyReports {
+    employeeId: string;
+    employeeName: string;
+    reports: DailyReport[];
+}
+
+// Get team's daily reports
+export async function getTeamDailyReports(date?: string, days?: number): Promise<EmployeeDailyReports[]> {
+    const params = new URLSearchParams();
+    if (date) params.append('date', date);
+    if (days) params.append('days', days.toString());
+    const queryString = params.toString();
+    return authFetch(`/api/daily-reports/team${queryString ? `?${queryString}` : ''}`);
+}
+
+// Review a daily report
+export async function reviewDailyReport(
+    reportId: number,
+    notes: string,
+    score?: number
+): Promise<{ success: boolean; message: string; report: DailyReport }> {
+    return authFetch(`/api/daily-reports/${reportId}/review`, {
+        method: 'POST',
+        body: JSON.stringify({ notes, score }),
+    });
+}
+
+// Get daily report submission stats for team
+export async function getTeamDailyReportStats(date?: string): Promise<{
+    date: string;
+    totalMembers: number;
+    submittedCount: number;
+    pendingCount: number;
+    averageAiScore: number | null;
+    members: {
+        employeeId: string;
+        employeeName: string;
+        hasSubmitted: boolean;
+        aiScore: number | null;
+        status: string | null;
+    }[];
+}> {
+    const params = date ? `?date=${date}` : '';
+    return authFetch(`/api/daily-reports/team/stats${params}`);
+}

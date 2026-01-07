@@ -162,7 +162,7 @@ export default function MyTeamPage() {
                                                     <div className="flex items-center gap-1">
                                                         <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
                                                         <span className="text-xs font-bold text-slate-700">
-                                                            {member.aura_score.toFixed(1)}
+                                                            {((member.aura_score / 100) * 5).toFixed(1)}
                                                         </span>
                                                     </div>
                                                     <Badge
@@ -258,7 +258,7 @@ export default function MyTeamPage() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
-                                        <span className="text-2xl font-bold text-slate-900">{selectedMember.aura_score.toFixed(1)}</span>
+                                        <span className="text-2xl font-bold text-slate-900">{((selectedMember.aura_score / 100) * 5).toFixed(1)}</span>
                                         <span className="text-sm text-slate-500">/ 5.0</span>
                                     </div>
 
@@ -302,23 +302,15 @@ export default function MyTeamPage() {
                                 )}
                             </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex gap-3 pt-6 mt-4 border-t border-slate-50">
-                                <Button
-                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
-                                    onClick={() => {
-                                        window.location.href = `mailto:${selectedMember.email}?subject=Message from Team Lead`;
-                                        toast.success('Opening email client...');
-                                    }}
-                                >
-                                    <MessageSquare className="mr-2 h-4 w-4" /> Message
-                                </Button>
+                            {/* Action Button */}
+                            <div className="pt-6 mt-4 border-t border-slate-50">
                                 <Button
                                     variant="outline"
-                                    className="flex-1 border-slate-200"
+                                    className="w-full border-slate-200"
                                     onClick={() => {
                                         // Copy employee details to clipboard
-                                        const details = `${selectedMember.full_name}\n${selectedMember.job_title || 'Team Member'}\n${selectedMember.email}\nEmployee ID: ${selectedMember.employee_id || 'N/A'}\nAura Score: ${selectedMember.aura_score?.toFixed(1) || 'N/A'}/5.0`;
+                                        const auraScore5 = selectedMember.aura_score ? ((selectedMember.aura_score / 100) * 5).toFixed(1) : 'N/A';
+                                        const details = `${selectedMember.full_name}\n${selectedMember.job_title || 'Team Member'}\n${selectedMember.email}\nEmployee ID: ${selectedMember.employee_id || 'N/A'}\nAura Score: ${auraScore5}/5.0`;
                                         navigator.clipboard.writeText(details);
                                         toast.success('Profile details copied to clipboard!', {
                                             description: 'Employee information has been copied.',

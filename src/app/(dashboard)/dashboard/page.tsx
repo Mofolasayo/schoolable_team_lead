@@ -165,8 +165,8 @@ export default function DashboardPage() {
             <div className="space-y-1">
               <h3 className="text-sm font-medium text-slate-500">Team Avg. Aura</h3>
               <div className="text-2xl font-bold text-slate-900">
-                {stats?.team_performance.average_aura_score?.toFixed(1) || '0.0'}
-                <span className="text-sm font-normal text-slate-400"> / 5.0</span>
+                {stats?.team_performance.average_aura_score ? ((stats.team_performance.average_aura_score / 100) * 5).toFixed(1) : '0.0'}
+                <span className="text-sm font-normal text-slate-400">/5.0</span>
               </div>
             </div>
             <p className="text-xs text-slate-400 mt-2">
@@ -289,7 +289,7 @@ export default function DashboardPage() {
                   {member.aura_score !== null ? (
                     <>
                       <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-                      <span className="text-xs text-slate-500">{member.aura_score.toFixed(1)}</span>
+                      <span className="text-xs text-slate-500">{((member.aura_score / 100) * 5).toFixed(1)}</span>
                     </>
                   ) : (
                     <span className="text-xs text-slate-400">-</span>
