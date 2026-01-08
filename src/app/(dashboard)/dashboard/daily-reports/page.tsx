@@ -77,7 +77,7 @@ export default function DailyReportsPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
         );
     }
@@ -107,7 +107,7 @@ export default function DailyReportsPage() {
                         <button
                             onClick={() => setViewMode('today')}
                             className={`px-4 py-2 text-sm font-medium transition-colors ${viewMode === 'today'
-                                ? 'bg-purple-600 text-white'
+                                ? 'bg-primary text-white'
                                 : 'bg-white text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
@@ -116,7 +116,7 @@ export default function DailyReportsPage() {
                         <button
                             onClick={() => setViewMode('week')}
                             className={`px-4 py-2 text-sm font-medium transition-colors ${viewMode === 'week'
-                                ? 'bg-purple-600 text-white'
+                                ? 'bg-primary text-white'
                                 : 'bg-white text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
@@ -172,7 +172,7 @@ export default function DailyReportsPage() {
                 <div className="bg-white rounded-xl shadow-sm p-5">
                     <div className="flex items-center gap-3">
                         <div className="p-3 bg-purple-100 rounded-lg">
-                            <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
                         </div>
@@ -219,7 +219,7 @@ export default function DailyReportsPage() {
                             <div key={employee.employeeId} className="p-4">
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <span className="text-purple-600 font-semibold">
+                                        <span className="text-primary font-semibold">
                                             {employee.employeeName?.charAt(0) || '?'}
                                         </span>
                                     </div>
@@ -345,7 +345,7 @@ function ReportDetailModal({
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="p-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-2xl">
+                <div className="p-6 bg-gradient-to-r from-primary to-indigo-600 text-white rounded-t-2xl">
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-bold">{employeeName}'s Report</h2>
@@ -513,7 +513,7 @@ function ReportDetailModal({
                                 <button
                                     onClick={handleSubmit}
                                     disabled={submitting || !reviewNotes.trim()}
-                                    className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50"
+                                    className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50"
                                 >
                                     {submitting ? 'Submitting...' : 'Submit Review'}
                                 </button>

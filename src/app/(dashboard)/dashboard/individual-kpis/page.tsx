@@ -68,7 +68,7 @@ export default function IndividualKpisPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
         );
     }
@@ -111,7 +111,7 @@ export default function IndividualKpisPage() {
                 <div className="ml-auto">
                     <button
                         onClick={() => setShowAddEmployeeModal(true)}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -162,7 +162,7 @@ export default function IndividualKpisPage() {
                 <div className="bg-white rounded-xl shadow-sm p-5">
                     <div className="flex items-center gap-3">
                         <div className="p-3 bg-purple-100 rounded-lg">
-                            <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </div>
@@ -187,7 +187,7 @@ export default function IndividualKpisPage() {
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <span className="text-purple-600 font-semibold">
+                                    <span className="text-primary font-semibold">
                                         {employee.employeeName?.charAt(0) || '?'}
                                     </span>
                                 </div>
@@ -211,7 +211,7 @@ export default function IndividualKpisPage() {
                                 </div>
                             ))}
                             {employee.kpis.length > 3 && (
-                                <p className="text-xs text-purple-600">+{employee.kpis.length - 3} more</p>
+                                <p className="text-xs text-primary">+{employee.kpis.length - 3} more</p>
                             )}
                         </div>
                         <div className="mt-4 pt-4 border-t border-gray-100">
@@ -235,7 +235,7 @@ export default function IndividualKpisPage() {
                     <p className="text-gray-500 mb-6">Start by setting individual KPIs for your team members.</p>
                     <button
                         onClick={() => setShowAddEmployeeModal(true)}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
+                        className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90"
                     >
                         Set KPIs for Employee
                     </button>
@@ -334,7 +334,7 @@ function EmployeeKpiModal({
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="p-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                <div className="p-6 bg-gradient-to-r from-primary to-indigo-600 text-white">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -379,7 +379,7 @@ function EmployeeKpiModal({
                         {employee.totalWeight < 100 && (
                             <button
                                 onClick={onAddKpi}
-                                className="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+                                className="text-sm text-primary hover:text-primary/90 font-medium flex items-center gap-1"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -400,7 +400,7 @@ function EmployeeKpiModal({
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium">
+                                        <span className="px-2 py-1 bg-purple-100 text-primary/90 text-xs rounded-full font-medium">
                                             {kpi.weight}%
                                         </span>
                                         <button
@@ -454,7 +454,7 @@ function EmployeeKpiModal({
                                                     setEditingKpi(kpi.id);
                                                     setEditValue(kpi.currentValue.toString());
                                                 }}
-                                                className="font-medium text-purple-600 hover:text-purple-700"
+                                                className="font-medium text-primary hover:text-primary/90"
                                             >
                                                 {kpi.currentValue} {kpi.targetUnit}
                                             </button>
@@ -488,7 +488,7 @@ function EmployeeKpiModal({
                             <p className="text-gray-500 mb-3">No KPIs set yet</p>
                             <button
                                 onClick={onAddKpi}
-                                className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
+                                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90"
                             >
                                 Add First KPI
                             </button>
@@ -570,7 +570,7 @@ function AddKpiModal({
                 <div className="p-6 border-b border-gray-100">
                     <h2 className="text-lg font-bold text-gray-900">Add KPI for {employeeName}</h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        Remaining weight: <span className="font-medium text-purple-600">{maxWeight}%</span>
+                        Remaining weight: <span className="font-medium text-primary">{maxWeight}%</span>
                     </p>
                 </div>
 
@@ -657,7 +657,7 @@ function AddKpiModal({
                         <button
                             type="submit"
                             disabled={saving}
-                            className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50"
                         >
                             {saving ? 'Saving...' : 'Add KPI'}
                         </button>
@@ -713,7 +713,7 @@ function SelectEmployeeModal({
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <span className="text-purple-600 font-semibold">
+                                            <span className="text-primary font-semibold">
                                                 {emp.name?.charAt(0) || '?'}
                                             </span>
                                         </div>

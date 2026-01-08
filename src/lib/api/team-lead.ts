@@ -10,18 +10,37 @@ const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://schoolable-back
 async function authFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const cookieStore = await cookies();
     const token = cookieStore.get('teamlead-auth-token')?.value;
+    const userInfoCookie = cookieStore.get('teamlead-user-info')?.value;
 
     if (!token) {
         throw new Error('No authentication token found');
     }
 
+    // Parse user ID from user info cookie for X-User-ID header
+    let userId: string | undefined;
+    if (userInfoCookie) {
+        try {
+            const userInfo = JSON.parse(userInfoCookie);
+            userId = userInfo.id || userInfo.employeeId;
+        } catch {
+            // Ignore parse errors
+        }
+    }
+
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options?.headers as Record<string, string>,
+    };
+
+    // Add X-User-ID header if available (required by some endpoints)
+    if (userId) {
+        headers['X-User-ID'] = userId;
+    }
+
     const response = await fetch(`${API_BASE}${endpoint}`, {
         ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            ...options?.headers,
-        },
+        headers,
     });
 
     if (!response.ok) {

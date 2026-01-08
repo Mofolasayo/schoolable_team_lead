@@ -67,7 +67,28 @@ export default function InsightsPage() {
         setTeamInsight(insightRes);
       }
 
-      setInsightHistory(historyRes.insights || []);
+      // Deduplicate insight history - keep only the latest insight per week
+      const insights = historyRes.insights || [];
+      const uniqueInsights = insights.reduce((acc: AiInsight[], insight) => {
+        const key = `${insight.weekNumber}-${insight.year}`;
+        const existing = acc.find(i => `${i.weekNumber}-${i.year}` === key);
+        if (!existing) {
+          acc.push(insight);
+        } else {
+          // Keep the more recent one
+          const existingDate = new Date(existing.generatedAt).getTime();
+          const currentDate = new Date(insight.generatedAt).getTime();
+          if (currentDate > existingDate) {
+            const index = acc.indexOf(existing);
+            acc[index] = insight;
+          }
+        }
+        return acc;
+      }, []);
+
+      // Sort by week number descending
+      uniqueInsights.sort((a, b) => b.weekNumber - a.weekNumber);
+      setInsightHistory(uniqueInsights);
 
       if ('overallTeamScore' in scoreRes) {
         setTeamScore(scoreRes);
@@ -156,7 +177,7 @@ export default function InsightsPage() {
         <button
           onClick={handleGenerateInsight}
           disabled={generating}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium disabled:opacity-50"
         >
           {generating ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -335,7 +356,7 @@ export default function InsightsPage() {
               <button
                 onClick={handleGenerateInsight}
                 disabled={generating}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium disabled:opacity-50"
               >
                 {generating ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />

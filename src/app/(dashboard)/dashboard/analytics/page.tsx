@@ -114,9 +114,8 @@ export default function AnalyticsPage() {
     fetchData();
   }, []);
 
-  // Process member performance data
+  // Process member performance data - include ALL members including team lead
   const memberPerformance: MemberPerformance[] = members
-    .filter(m => !m.is_team_lead)
     .map(m => ({
       id: m.id,
       name: m.full_name,
@@ -128,7 +127,9 @@ export default function AnalyticsPage() {
     .sort((a, b) => (b.auraScore || 0) - (a.auraScore || 0));
 
   // Calculate summary metrics
-  const avgAura = stats?.team_performance?.average_aura_score || 0;
+  // Backend returns Aura as 0-100 percentage, convert to 0-5 scale for display
+  const avgAuraRaw = stats?.team_performance?.average_aura_score || 0;
+  const avgAura = (avgAuraRaw / 100) * 5; // Convert to 0-5 scale
   const taskCompletionRate = stats?.tasks?.total
     ? Math.round((stats.tasks.completed / stats.tasks.total) * 100)
     : 0;
@@ -227,7 +228,7 @@ export default function AnalyticsPage() {
         <Card className="border-slate-200/60 shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2.5 rounded-xl bg-purple-100/50 text-purple-600">
+              <div className="p-2.5 rounded-xl bg-primary/10/50 text-purple-600">
                 <TrendingUp className="h-5 w-5" />
               </div>
               <Badge className="bg-purple-50 text-purple-700 border-0">{highPerformers}</Badge>

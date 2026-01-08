@@ -89,7 +89,7 @@ const PEER_RATING_ITEMS = [
         name: "Adaptability",
         description: "How well do they adapt to changes and new situations?",
         icon: Brain,
-        color: "text-purple-600",
+        color: "text-primary",
         bgColor: "bg-purple-50"
     },
     {
