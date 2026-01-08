@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Mail, X, Loader2, AlertCircle, Star, ClipboardCopy } from 'lucide-react';
+import { Mail, X, Loader2, AlertCircle, Star, ClipboardCopy } from 'lucide-react';
 import { CustomDialog } from '@/components/ui/custom-dialog'
 import { getTeamMembers, TeamMember, TeamMembersResponse } from '@/lib/api/team-lead';
 import { toast } from 'sonner';

@@ -87,7 +87,7 @@ export default function DailyReportsPage() {
             {/* Header */}
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Daily Reports</h1>
-                <p className="text-gray-500 mt-1">Review and manage your team's daily submissions</p>
+                <p className="text-gray-500 mt-1">Review and manage your team&apos;s daily submissions</p>
             </div>
 
             {/* Controls */}
@@ -348,7 +348,7 @@ function ReportDetailModal({
                 <div className="p-6 bg-gradient-to-r from-primary to-indigo-600 text-white rounded-t-2xl">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-lg font-bold">{employeeName}'s Report</h2>
+                            <h2 className="text-lg font-bold">{employeeName}&apos;s Report</h2>
                             <p className="text-purple-100 text-sm">
                                 {new Date(report.reportDate).toLocaleDateString('en-US', {
                                     weekday: 'long',
@@ -466,7 +466,7 @@ function ReportDetailModal({
                                     </div>
                                 );
                             }
-                        } catch (e) {
+                        } catch (_e) {
                             // If parsing fails, show as text
                             return null;
                         }
