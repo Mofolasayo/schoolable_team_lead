@@ -1,4 +1,16 @@
-import { LayoutDashboard, Users, CheckSquare, Settings, FileText, Megaphone, LucideIcon, Brain, BarChart3, ClipboardList, Target, CalendarDays } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Users,
+  CheckSquare,
+  FileText,
+  Megaphone,
+  LucideIcon,
+  Brain,
+  BarChart3,
+  ClipboardList,
+  Target,
+  CalendarDays,
+} from 'lucide-react';
 
 export interface NavigationItem {
   title: string;
@@ -74,11 +86,5 @@ export const dashboardNavigation: NavigationItem[] = [
     href: '/dashboard/announcements',
     icon: Megaphone,
     section: 'main',
-  },
-  {
-    title: 'Settings',
-    href: '/dashboard/settings',
-    icon: Settings,
-    section: 'system',
   },
 ];

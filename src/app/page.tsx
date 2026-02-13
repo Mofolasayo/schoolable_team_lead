@@ -9,20 +9,25 @@ export default function Home() {
       <div className="z-10 w-full max-w-md items-center justify-between font-mono text-sm">
         <div className="mb-8 flex justify-center">
           <img
-            src="/schoolable_logo.png"
-            alt="Schoolable"
+            src="/worksight_logo.png"
+            alt="WorkSight"
             className="h-24 w-auto object-contain"
           />
         </div>
 
         <div className="space-y-4 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Schoolable Team Lead</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+            WorkSight Team Lead
+          </h1>
           <p className="text-slate-600">
             Manage your team&apos;s tasks, performance, and goals efficiently.
           </p>
           <div className="pt-4">
             <Link href="/login">
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700" size="lg">
+              <Button
+                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                size="lg"
+              >
                 Go to Login
               </Button>
             </Link>

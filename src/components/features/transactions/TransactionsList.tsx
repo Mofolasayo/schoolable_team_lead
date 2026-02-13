@@ -13,427 +13,64 @@ import {
   RefreshCcw,
   ArrowLeft,
   ArrowRight,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Extended mock data
-const allTransactions = [
-  {
-    id: 1,
-    date: '21 Feb',
-    time: '10:14',
-    name: 'Notion Labs',
-    details: 'SaaS subscription',
-    category: 'Software',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -16639.6,
-    status: 'Success',
-    icon: Receipt,
-  },
-  {
-    id: 2,
-    date: '21 Feb',
-    time: '08:02',
-    name: 'City Transport',
-    details: 'Metro top-up',
-    category: 'Transport',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -2500.0,
-    status: 'Success',
-    icon: Bus,
-  },
-  {
-    id: 3,
-    date: '20 Feb',
-    time: '17:41',
-    name: 'Incoming transfer',
-    details: 'From Nova Studio',
-    category: 'Transfer-in',
-    cardType: 'Bank',
-    cardLast4: 'IBAN',
-    amount: 125000.0,
-    status: 'Success',
-    icon: RefreshCcw,
-  },
-  {
-    id: 4,
-    date: '20 Feb',
-    time: '13:09',
-    name: 'Team lunch',
-    details: 'Bistro La Place',
-    category: 'Dining',
-    cardType: 'Virtual',
-    cardLast4: '7741',
-    amount: -8450.0,
-    status: 'Pending',
-    icon: Coffee,
-  },
-  {
-    id: 5,
-    date: '20 Feb',
-    time: '09:18',
-    name: 'Cafe Central',
-    details: 'Coffee & snacks',
-    category: 'Dining',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -1250.0,
-    status: 'Pending',
-    icon: Coffee,
-  },
-  {
-    id: 6,
-    date: '19 Feb',
-    time: '14:03',
-    name: 'Domain renewal',
-    details: 'aurora-wallet.com',
-    category: 'Services',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -3850.0,
-    status: 'Success',
-    icon: Globe,
-  },
-  {
-    id: 7,
-    date: '19 Feb',
-    time: '10:22',
-    name: 'Refund • Notion Labs',
-    details: 'Prorated credit',
-    category: 'Refund',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: 5500.0,
-    status: 'Success',
-    icon: RefreshCcw,
-  },
-  {
-    id: 8,
-    date: '19 Feb',
-    time: '09:58',
-    name: 'Card verification',
-    details: 'Security check',
-    category: 'Security',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -100.0,
-    status: 'Failed',
-    icon: Shield,
-  },
-  {
-    id: 9,
-    date: '18 Feb',
-    time: '18:29',
-    name: 'Flight to Berlin',
-    details: 'Business travel',
-    category: 'Travel',
-    cardType: 'Virtual',
-    cardLast4: '7741',
-    amount: -45780.0,
-    status: 'Success',
-    icon: Plane,
-  },
-  {
-    id: 10,
-    date: '18 Feb',
-    time: '09:11',
-    name: 'Incoming transfer',
-    details: 'ACME Studio',
-    category: 'Transfer-in',
-    cardType: 'Bank',
-    cardLast4: 'IBAN',
-    amount: 85000.0,
-    status: 'Success',
-    icon: RefreshCcw,
-  },
-  // Page 2 Data
-  {
-    id: 11,
-    date: '17 Feb',
-    time: '15:30',
-    name: 'AWS Services',
-    details: 'Monthly hosting',
-    category: 'Software',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -24500.0,
-    status: 'Success',
-    icon: Globe,
-  },
-  {
-    id: 12,
-    date: '17 Feb',
-    time: '12:15',
-    name: 'Uber Ride',
-    details: 'Client meeting',
-    category: 'Transport',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -3200.0,
-    status: 'Success',
-    icon: Bus,
-  },
-  {
-    id: 13,
-    date: '16 Feb',
-    time: '09:45',
-    name: 'Starbucks',
-    details: 'Team breakfast',
-    category: 'Dining',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -4500.0,
-    status: 'Success',
-    icon: Coffee,
-  },
-  {
-    id: 14,
-    date: '16 Feb',
-    time: '14:20',
-    name: 'Apple Store',
-    details: 'Equipment',
-    category: 'Hardware',
-    cardType: 'Virtual',
-    cardLast4: '7741',
-    amount: -185000.0,
-    status: 'Success',
-    icon: Receipt,
-  },
-  {
-    id: 15,
-    date: '15 Feb',
-    time: '11:00',
-    name: 'Consulting Fee',
-    details: 'Client payment',
-    category: 'Transfer-in',
-    cardType: 'Bank',
-    cardLast4: 'IBAN',
-    amount: 450000.0,
-    status: 'Success',
-    icon: RefreshCcw,
-  },
-  {
-    id: 16,
-    date: '15 Feb',
-    time: '16:45',
-    name: 'Slack',
-    details: 'Monthly subscription',
-    category: 'Software',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -8500.0,
-    status: 'Success',
-    icon: Receipt,
-  },
-  {
-    id: 17,
-    date: '14 Feb',
-    time: '13:30',
-    name: 'Business Lunch',
-    details: 'The Grill House',
-    category: 'Dining',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -15400.0,
-    status: 'Pending',
-    icon: Coffee,
-  },
-  {
-    id: 18,
-    date: '14 Feb',
-    time: '09:00',
-    name: 'Google Workspace',
-    details: 'Email services',
-    category: 'Software',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -12000.0,
-    status: 'Success',
-    icon: Globe,
-  },
-  {
-    id: 19,
-    date: '13 Feb',
-    time: '10:15',
-    name: 'Office Supplies',
-    details: 'Staples',
-    category: 'Office',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -5600.0,
-    status: 'Success',
-    icon: Receipt,
-  },
-  {
-    id: 20,
-    date: '13 Feb',
-    time: '15:50',
-    name: 'Client Refund',
-    details: 'Service adjustment',
-    category: 'Refund',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -25000.0,
-    status: 'Success',
-    icon: RefreshCcw,
-  },
-  // Page 3 Data
-  {
-    id: 21,
-    date: '12 Feb',
-    time: '08:45',
-    name: 'Airport Taxi',
-    details: 'Travel expense',
-    category: 'Transport',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -8500.0,
-    status: 'Success',
-    icon: Bus,
-  },
-  {
-    id: 22,
-    date: '12 Feb',
-    time: '12:30',
-    name: 'Hotel Booking',
-    details: 'Marriott',
-    category: 'Travel',
-    cardType: 'Virtual',
-    cardLast4: '7741',
-    amount: -125000.0,
-    status: 'Success',
-    icon: Plane,
-  },
-  {
-    id: 23,
-    date: '11 Feb',
-    time: '14:15',
-    name: 'Project Bonus',
-    details: 'Q1 Performance',
-    category: 'Transfer-in',
-    cardType: 'Bank',
-    cardLast4: 'IBAN',
-    amount: 50000.0,
-    status: 'Success',
-    icon: RefreshCcw,
-  },
-  {
-    id: 24,
-    date: '11 Feb',
-    time: '10:00',
-    name: 'LinkedIn Premium',
-    details: 'Subscription',
-    category: 'Software',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -15000.0,
-    status: 'Success',
-    icon: Globe,
-  },
-  {
-    id: 25,
-    date: '10 Feb',
-    time: '16:20',
-    name: 'Courier Service',
-    details: 'Document delivery',
-    category: 'Services',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -3500.0,
-    status: 'Success',
-    icon: Receipt,
-  },
-  {
-    id: 26,
-    date: '10 Feb',
-    time: '09:30',
-    name: 'Internet Bill',
-    details: 'ISP Provider',
-    category: 'Utilities',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -22000.0,
-    status: 'Success',
-    icon: Globe,
-  },
-  {
-    id: 27,
-    date: '09 Feb',
-    time: '13:45',
-    name: 'Client Lunch',
-    details: 'Seafood Restaurant',
-    category: 'Dining',
-    cardType: 'Physical',
-    cardLast4: '2910',
-    amount: -28000.0,
-    status: 'Success',
-    icon: Coffee,
-  },
-  {
-    id: 28,
-    date: '09 Feb',
-    time: '11:15',
-    name: 'Software License',
-    details: 'Adobe Creative Cloud',
-    category: 'Software',
-    cardType: 'Virtual',
-    cardLast4: '4829',
-    amount: -45000.0,
-    status: 'Success',
-    icon: Receipt,
-  },
-  {
-    id: 29,
-    date: '08 Feb',
-    time: '15:00',
-    name: 'Office Rent',
-    details: 'February Rent',
-    category: 'Utilities',
-    cardType: 'Bank',
-    cardLast4: 'IBAN',
-    amount: -450000.0,
-    status: 'Success',
-    icon: Receipt,
-  },
-  {
-    id: 30,
-    date: '08 Feb',
-    time: '10:00',
-    name: 'Investment Return',
-    details: 'Dividend',
-    category: 'Transfer-in',
-    cardType: 'Bank',
-    cardLast4: 'IBAN',
-    amount: 75000.0,
-    status: 'Success',
-    icon: RefreshCcw,
-  },
-];
+export type Transaction = {
+  id: number | string;
+  date: string;
+  time: string;
+  name: string;
+  details: string;
+  category: string;
+  cardType: string;
+  cardLast4: string;
+  amount: number;
+  status: string;
+};
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  software: Globe,
+  transport: Bus,
+  dining: Coffee,
+  travel: Plane,
+  security: Shield,
+  supplies: Receipt,
+  benefits: Shield,
+  payroll: RefreshCcw,
+  refund: RefreshCcw,
+  services: Globe,
+  'transfer-in': RefreshCcw,
+  'transfer-out': RefreshCcw,
+};
 
 const ITEMS_PER_PAGE = 10;
 
 interface TransactionsListProps {
   searchQuery?: string;
+  transactions?: Transaction[];
 }
 
-export function TransactionsList({ searchQuery = '' }: TransactionsListProps) {
+export function TransactionsList({
+  searchQuery = '',
+  transactions = [],
+}: TransactionsListProps) {
   const [activeTab, setActiveTab] = useState<'All' | 'Money in' | 'Money out'>(
     'All'
   );
   const [currentPage, setCurrentPage] = useState(1);
 
   // Calculate totals from full dataset
-  const moneyIn = allTransactions
+  const moneyIn = transactions
     .filter((t) => t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
-  const moneyOut = allTransactions
+  const moneyOut = transactions
     .filter((t) => t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   // Filter transactions
-  const filteredTransactions = allTransactions.filter((t) => {
+  const filteredTransactions = transactions.filter((t) => {
     // Tab filter
     if (activeTab === 'Money in' && t.amount <= 0) return false;
     if (activeTab === 'Money out' && t.amount >= 0) return false;
@@ -457,6 +94,11 @@ export function TransactionsList({ searchQuery = '' }: TransactionsListProps) {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const periodLabel =
+    transactions.length > 0
+      ? `${transactions[transactions.length - 1]?.date} - ${transactions[0]?.date}`
+      : '—';
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -516,7 +158,7 @@ export function TransactionsList({ searchQuery = '' }: TransactionsListProps) {
 
         {/* Period Summary */}
         <div className="mt-4 flex items-center gap-8 rounded-lg bg-muted/30 p-3">
-          <div className="text-xs text-muted-foreground">21 Feb - 21 Mar</div>
+          <div className="text-xs text-muted-foreground">{periodLabel}</div>
           <div className="flex gap-8">
             <div>
               <div className="text-[10px] uppercase text-muted-foreground">
@@ -568,7 +210,8 @@ export function TransactionsList({ searchQuery = '' }: TransactionsListProps) {
           <tbody>
             {paginatedTransactions.length > 0 ? (
               paginatedTransactions.map((transaction) => {
-                const Icon = transaction.icon;
+                const Icon =
+                  CATEGORY_ICONS[transaction.category.toLowerCase()] ?? Receipt;
                 return (
                   <tr
                     key={transaction.id}

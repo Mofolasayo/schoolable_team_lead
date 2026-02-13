@@ -7,12 +7,12 @@ import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Schoolable | Team Lead Dashboard',
-  description: 'Team Lead Dashboard for Schoolable HR Platform',
+  title: 'WorkSight | Team Lead Dashboard',
+  description: 'Team Lead Dashboard for WorkSight HR Platform',
   icons: {
-    icon: '/schoolable_logo.png',
-    shortcut: '/schoolable_logo.png',
-    apple: '/schoolable_logo.png',
+    icon: '/worksight_logo.png',
+    shortcut: '/worksight_logo.png',
+    apple: '/worksight_logo.png',
   },
 };
 
@@ -30,4 +30,3 @@ export default function RootLayout({
     </html>
   );
 }
-

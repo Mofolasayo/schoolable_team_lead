@@ -1,29 +1,39 @@
 import type { Metadata } from 'next';
 import { Plus } from 'lucide-react';
+import { getTeamMembers } from '@/lib/api/team-lead';
 
 export const metadata: Metadata = {
   title: 'User Management · Dashboard',
 };
 
-const teams = [
-  {
-    name: 'Platform Admins',
-    members: 6,
-    description: 'Full system access with audit logging enabled.',
-  },
-  {
-    name: 'Risk & Compliance',
-    members: 12,
-    description: 'Transaction reviews, SAR escalations, and dispute workflows.',
-  },
-  {
-    name: 'Customer Operations',
-    members: 18,
-    description: 'Account support, verifications, and manual payouts.',
-  },
-];
+export default async function DashboardUsersPage() {
+  let teamData: Awaited<ReturnType<typeof getTeamMembers>> | null = null;
+  try {
+    teamData = await getTeamMembers(true);
+  } catch {
+    teamData = null;
+  }
 
-export default function DashboardUsersPage() {
+  const teamLeadCount =
+    teamData?.members.filter((member) => member.is_team_lead).length || 0;
+  const memberCount = teamData?.members.length || 0;
+  const departmentLabel = teamData?.department || 'Team';
+
+  const teams = teamData
+    ? [
+        {
+          name: `${departmentLabel} Leads`,
+          members: teamLeadCount,
+          description: 'Team leads and department coordinators.',
+        },
+        {
+          name: `${departmentLabel} Members`,
+          members: Math.max(0, memberCount - teamLeadCount),
+          description: 'Active contributors in the department.',
+        },
+      ]
+    : [];
+
   return (
     <div className="space-y-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -42,38 +52,32 @@ export default function DashboardUsersPage() {
         </button>
       </header>
 
-      <section className="grid gap-4">
-        {teams.map((team) => (
-          <article
-            key={team.name}
-            className="rounded-lg border border-border bg-background/80 p-5 shadow-sm"
-          >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">{team.name}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {team.description}
-                </p>
+      {teamData ? (
+        <section className="grid gap-4">
+          {teams.map((team) => (
+            <article
+              key={team.name}
+              className="rounded-lg border border-border bg-background/80 p-5 shadow-sm"
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold">{team.name}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {team.description}
+                  </p>
+                </div>
+                <span className="inline-flex items-center rounded-full border border-dashed border-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+                  {team.members} members
+                </span>
               </div>
-              <span className="inline-flex items-center rounded-full border border-dashed border-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                {team.members} members
-              </span>
-            </div>
-          </article>
-        ))}
-      </section>
-
-      <section className="space-y-3 rounded-lg border border-border bg-background/80 p-5 shadow-sm">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Pending Invitations
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Send reminders to teammates who haven’t accepted their invite yet.
-        </p>
-        <div className="rounded-md border border-dashed border-border/80 bg-muted/40 p-4 text-sm text-muted-foreground">
-          No pending invitations — invite someone new to get started.
-        </div>
-      </section>
+            </article>
+          ))}
+        </section>
+      ) : (
+        <section className="rounded-lg border border-border bg-background/80 p-6 text-sm text-muted-foreground">
+          Team data is unavailable right now. Refresh to try again.
+        </section>
+      )}
     </div>
   );
 }
